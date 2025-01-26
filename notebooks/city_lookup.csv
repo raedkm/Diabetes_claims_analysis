@@ -1,0 +1,193 @@
+clean_city,list_of_variants
+Abha,"<StringArray>
+['Abha']
+Length: 1, dtype: string"
+Afif,"<StringArray>
+['AFIF']
+Length: 1, dtype: string"
+Aflaj,"<StringArray>
+['AFLAJ']
+Length: 1, dtype: string"
+Al Baha,"<StringArray>
+['AL BAHA']
+Length: 1, dtype: string"
+Al Dwadmi,"<StringArray>
+['AL DWADMI']
+Length: 1, dtype: string"
+Al Kharj,"<StringArray>
+['AL KHARJ']
+Length: 1, dtype: string"
+Al Khormah,"<StringArray>
+['AL KHORMAH']
+Length: 1, dtype: string"
+Al Nuairiyah,"<StringArray>
+['Al Nuairiyah']
+Length: 1, dtype: string"
+Al Quraiat,"<StringArray>
+['Al Quraiat']
+Length: 1, dtype: string"
+Al Russ,"<StringArray>
+['AL RUSS']
+Length: 1, dtype: string"
+Al-Ahasa,"<StringArray>
+['AL-AHASA']
+Length: 1, dtype: string"
+Alkhobar,"<StringArray>
+['ALKHOBAR']
+Length: 1, dtype: string"
+Aqiq,"<StringArray>
+['AQIQ']
+Length: 1, dtype: string"
+Arar,"<StringArray>
+['ARAR']
+Length: 1, dtype: string"
+Badaie,"<StringArray>
+['BADAIE']
+Length: 1, dtype: string"
+Bader,"<StringArray>
+['BADER']
+Length: 1, dtype: string"
+Bagaa,"<StringArray>
+['BAGAA']
+Length: 1, dtype: string"
+Bukairiyah,"<StringArray>
+['BUKAIRIYAH']
+Length: 1, dtype: string"
+Bureidah,"<StringArray>
+['BUREIDAH']
+Length: 1, dtype: string"
+Dammam,"<StringArray>
+['DAMMAM']
+Length: 1, dtype: string"
+Darb,"<StringArray>
+['DARB']
+Length: 1, dtype: string"
+Dheba,"<StringArray>
+['DHEBA']
+Length: 1, dtype: string"
+Hafr Albaten,"<StringArray>
+['HAFR ALBATEN']
+Length: 1, dtype: string"
+Hail,"<StringArray>
+['HAIL']
+Length: 1, dtype: string"
+Haql,"<StringArray>
+['HAQL']
+Length: 1, dtype: string"
+Hofuf,"<StringArray>
+['HOFUF']
+Length: 1, dtype: string"
+Houtat Bani-Tamim,"<StringArray>
+['HOUTAT BANI-TAMIM']
+Length: 1, dtype: string"
+Ibqaiq,"<StringArray>
+['Ibqaiq']
+Length: 1, dtype: string"
+Jeddah,"<StringArray>
+['JEDDAH']
+Length: 1, dtype: string"
+Jizan,"<StringArray>
+['JIZAN']
+Length: 1, dtype: string"
+Jubail,"<StringArray>
+['JUBAIL']
+Length: 1, dtype: string"
+Khafji,"<StringArray>
+['KHAFJI']
+Length: 1, dtype: string"
+Khamis Mushait,"<StringArray>
+['KHAMIS MUSHAIT']
+Length: 1, dtype: string"
+Madina,"<StringArray>
+['MADINA']
+Length: 1, dtype: string"
+Mahail,"<StringArray>
+['MAHAIL']
+Length: 1, dtype: string"
+Majmaah,"<StringArray>
+['MAJMAAH']
+Length: 1, dtype: string"
+Makkah,"<StringArray>
+['MAKKAH']
+Length: 1, dtype: string"
+Methnab,"<StringArray>
+['METHNAB']
+Length: 1, dtype: string"
+Najran,"<StringArray>
+['NAJRAN']
+Length: 1, dtype: string"
+Onaiza,"<StringArray>
+['ONAIZA']
+Length: 1, dtype: string"
+Oyaynah,"<StringArray>
+['OYAYNAH']
+Length: 1, dtype: string"
+Qatif,"<StringArray>
+['QATIF']
+Length: 1, dtype: string"
+Quaieyyah,"<StringArray>
+['QUAIEYYAH']
+Length: 1, dtype: string"
+Rabegh,"<StringArray>
+['RABEGH']
+Length: 1, dtype: string"
+Rafha,"<StringArray>
+['RAFHA']
+Length: 1, dtype: string"
+Ras Tannura,"<StringArray>
+['RAS TANNURA']
+Length: 1, dtype: string"
+Riyadh,"<StringArray>
+['RIYADH']
+Length: 1, dtype: string"
+Riyadh Al-Kabra,"<StringArray>
+['RIYADH AL-KABRA']
+Length: 1, dtype: string"
+Sabt Al-Alaya,"<StringArray>
+['SABT AL-ALAYA']
+Length: 1, dtype: string"
+Sabya,"<StringArray>
+['SABYA']
+Length: 1, dtype: string"
+Safwa,"<StringArray>
+['SAFWA']
+Length: 1, dtype: string"
+Sakaka,"<StringArray>
+['SAKAKA']
+Length: 1, dtype: string"
+Sharoura,"<StringArray>
+['SHAROURA']
+Length: 1, dtype: string"
+Sihat,"<StringArray>
+['SIHAT']
+Length: 1, dtype: string"
+Sulayyel,"<StringArray>
+['SULAYYEL']
+Length: 1, dtype: string"
+Tabarjal,"<StringArray>
+['TABARJAL']
+Length: 1, dtype: string"
+Tabuk,"<StringArray>
+['TABUK']
+Length: 1, dtype: string"
+Taif,"<StringArray>
+['TAIF']
+Length: 1, dtype: string"
+Taroot,"<StringArray>
+['TAROOT']
+Length: 1, dtype: string"
+Unknown,"<StringArray>
+['Unknown']
+Length: 1, dtype: string"
+Wadi Al Dawasir,"<StringArray>
+['WADI AL DAWASIR']
+Length: 1, dtype: string"
+Wajh,"<StringArray>
+['WAJH']
+Length: 1, dtype: string"
+Yanbu,"<StringArray>
+['YANBU']
+Length: 1, dtype: string"
+Zulfi,"<StringArray>
+['ZULFI']
+Length: 1, dtype: string"
