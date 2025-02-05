@@ -1,6 +1,6 @@
 <h2>Analysis of Diabetic Population Claims Data</h2>
 
-\newpage
+<div style="page-break-after: always;"></div>
 
 ## Table of Contents
 - [0. Executive Summary](#0-executive-summary)
@@ -12,10 +12,24 @@
 - [2. Preprocessing Steps](#2-preprocessing-steps)
   - [2.1 Data Ingestion](#21-data-ingestion)
   - [2.2 Data Cleaning](#22-data-cleaning)
+    - [2.2.1 Identifying Missing Data](#221-identifying-missing-data)
+    - [2.2.2 Handling Missing Data](#222-handling-missing-data)
+    - [2.2.3 Checking for Duplicates](#223-checking-for-duplicates)
+    - [2.2.4 Data Validation](#224-data-validation)
   - [2.4 Data Quality checks](#24-data-quality-checks)
+    - [2.4.1 Logical Value Checks](#241-logical-value-checks)
+    - [2.4.2 Identifying Family Units Using member\_code](#242-identifying-family-units-using-member_code)
+    - [2.4.3 Correct code mapping](#243-correct-code-mapping)
+    - [2.3.1 Issues with Claim Type into an Indicator](#231-issues-with-claim-type-into-an-indicator)
+    - [2.3.2. Non-Standardized City Names](#232-non-standardized-city-names)
+    - [2.4.4 Intermediate Quality Report \& Documentation](#244-intermediate-quality-report--documentation)
 - [3. Feature Engineering \& Feature Store](#3-feature-engineering--feature-store)
   - [3.1 Overview of Data Transformations \& Feature Engineering](#31-overview-of-data-transformations--feature-engineering)
   - [3.2 Key Data Transformations \& Feature Creation](#32-key-data-transformations--feature-creation)
+    - [3.2.1 Creating Unique Identifiers](#321-creating-unique-identifiers)
+    - [3.2.2 Numerical to Categorical Transformations](#322-numerical-to-categorical-transformations)
+    - [3.2.3 Grouping Cities with low counts into "Other"](#323-grouping-cities-with-low-counts-into-other)
+  - [In addition to cleaning the city names a new variable was created "Major City". The variable categorizing cities based on the top 5 cities by unique patient count, the remaining cities were labeled "Other" including rows with an "Unknown" vit value.](#in-addition-to-cleaning-the-city-names-a-new-variable-was-created-major-city-the-variable-categorizing-cities-based-on-the-top-5-cities-by-unique-patient-count-the-remaining-cities-were-labeled-other-including-rows-with-an-unknown-vit-value)
   - [3.3 Extracting Feature Tables](#33-extracting-feature-tables)
   - [3.4 Storing Features for Reuse](#34-storing-features-for-reuse)
 - [4 Reports: City Level Analysis Report](#4-reports-city-level-analysis-report)
@@ -28,22 +42,23 @@
     - [4.5.2 : Comparing Models](#452--comparing-models)
     - [4.5.3 : Model Results](#453--model-results)
     - [4.5.4 : Model Diagnostics](#454--model-diagnostics)
+  - [](#)
   - [4.6 : Results](#46--results)
+  - [](#-1)
   - [4.7 : Discussion and Limitations](#47--discussion-and-limitations)
   - [4.8 : Next Steps](#48--next-steps)
   - [4.9 : Conclusion](#49--conclusion)
 
-\newpage
+<div style="page-break-after: always;"></div>
 
 ---
 
 # 0. Executive Summary
 This report presents an in-depth analysis of a diabetic population claims dataset to assess data quality, identify key trends, and apply advanced analytical techniques. The report outlines preprocessing steps, descriptive analytics, feature engineering, machine learning applications, and strategic recommendations for improving data usability and deriving actionable insights. The findings will support better decision-making in healthcare claims management.
 
-\newpage
+<div style="page-break-after: always;"></div>
 
 ---
-
 # 1. Technical Report Overview
 
 ## 1.1 Project Aim
@@ -58,15 +73,15 @@ This project aims to analyze claims data for a diabetic population, uncovering k
 - Propose strategies to enhance data integrity and analytics adoption within enterprise settings.
 
 ## 1.3 Skills Matrix
-| Application in Report       | Description                                                       |
-|----------------------------|-------------------------------------------------------------------|
-| Data Cleaning              | Handling missing values, duplicates, and plausibility checks     |
-| Descriptive Analytics      | Summarizing dataset attributes, distribution, and trends        |
-| Data Quality Assessment    | Identifying inconsistencies and proposing enhancements          |
-| Feature Engineering        | Creating structured and meaningful features for modeling        |
-| Advanced Analytics         | Applying clustering, predictive modeling, and hypothesis testing |
-| AI & LLM Integration       | Exploring retrieval-based AI insights for structured and unstructured data |
-| Tools                      | Python, Pandas, Scikit-learn, Matplotlib, Seaborn, SQL, Parquet  |
+| Application in Report   | Description                                                                |
+|-------------------------|----------------------------------------------------------------------------|
+| Data Cleaning           | Handling missing values, duplicates, and plausibility checks               |
+| Descriptive Analytics   | Summarizing dataset attributes, distribution, and trends                   |
+| Data Quality Assessment | Identifying inconsistencies and proposing enhancements                     |
+| Feature Engineering     | Creating structured and meaningful features for modeling                   |
+| Advanced Analytics      | Applying clustering, predictive modeling, and hypothesis testing           |
+| AI & LLM Integration    | Exploring retrieval-based AI insights for structured and unstructured data |
+| Tools                   | Python, Pandas, Scikit-learn, Matplotlib, Seaborn, SQL, Parquet            |
 
 *Suggestions: Add specific tools in the skills matrix*
 
@@ -84,11 +99,12 @@ The pipeline includes the following stages:
 
 ***Insert a graphics flow chart for the methodology section***
 
-\newpage
+<div style="page-break-after: always;"></div>
 
----
+
 
 # 2. Preprocessing Steps
+
 ## 2.1 Data Ingestion
 <!-- ![Age Distribution](age_distribution.png) -->
 The raw layer ingests CSV files while enforcing schema validation. This ensures that each column maintains the correct data type, preventing inconsistencies in downstream processing. The data is then converted to Parquet format for storage efficiency and type preservation.
@@ -114,7 +130,10 @@ dtype_dict = {
     "CLAIM_TYPE": "category",   # Claim type is categorical
     "BMI": "float64"            # BMI as a float
 }
+```
+<div style="page-break-after: always;"></div>
 
+```python
 # Column renaming lookup table
 column_lookup = {
     "MEMBER_CODE": "member_code",
@@ -137,21 +156,23 @@ raw_data = pd.read_csv(raw_data_path, dtype=dtype_dict)
 
 After schema validation, the dataset is saved in `Parquet format` to maintain column types across different processing layers.
 
+---
 ## 2.2 Data Cleaning
 - The average age of patients is {df['Age'].mean():.2f} years.
 - The dataset contains {df.shape[0]} rows and {df.shape[1]} columns.
 
 To ensure data consistency and integrity, a series of data cleaning steps were performed, including handling missing values, identifying and removing duplicates, and validating the dataset.
 
-**1. Identifying Missing Data**
+### 2.2.1 Identifying Missing Data
 
 A summary of missing values was generated to assess completeness. The city column was identified as having 4,700 missing values, while other critical fields remained largely intact.
 
-**2. Handling Missing Data**
+### 2.2.2 Handling Missing Data
 
 The missing values in the city column were replaced with "Unknown" to retain records without introducing bias. Other imputation strategies, such as mean or mode imputation, were considered but were not required at this stage.
 
-**3. Checking for Duplicates**
+
+### 2.2.3 Checking for Duplicates
 
 Duplicate records were reviewed to prevent redundant information.
 
@@ -160,7 +181,9 @@ Duplicate records were reviewed to prevent redundant information.
   - 34,233 out of 34,235 records with claim_type = I had an identical entry with claim_type = O.
   - These inconsistencies were flagged for further review and correction in subsequent processing stages.
 
-**4. Data Validation**
+
+
+### 2.2.4 Data Validation
 
 Following the cleaning steps, a final validation was conducted to confirm:
 
@@ -170,12 +193,11 @@ Following the cleaning steps, a final validation was conducted to confirm:
 
 This ensures the dataset is now structured, consistent, and ready for transformation in the next stage.
 
-
-
+---
 ## 2.4 Data Quality checks
 To ensure the dataset maintains logical consistency and accuracy, a series of data validation checks were conducted. These checks included logical value constraints, member data consistency assessments, and ICD code standardization. Any identified issues were documented for further analysis.
 
-**2.4.1. Logical Value Checks**
+### 2.4.1 Logical Value Checks
 
 Key numerical and categorical variables were validated against predefined logical ranges:
 - age: Ensured all values fell within a plausible range (0–120 years).
@@ -184,11 +206,11 @@ Key numerical and categorical variables were validated against predefined logica
 
 *Suggestions: How will you handle outliers or incorrect values*
 
-**2.4.2. Identifying Family Units Using member_code**
+### 2.4.2 Identifying Family Units Using member_code
 
 Some member_code values are linked to individuals of different ages and genders, suggesting that member_code may represent family units rather than individual identifiers. For example, the same member_code appears for both male and female individuals of varying ages, indicating family-level grouping within policies. A unique identifier for individuals is created in the feature engineering section.
 
-**2.4.3. Correct code mapping**
+### 2.4.3 Correct code mapping
 
 An ICD-10 lookup table was created for icd_code and icd_description to:
 
@@ -196,8 +218,7 @@ An ICD-10 lookup table was created for icd_code and icd_description to:
 - Ensure consistency in ICD-10 codes across records.
 - Detect missing or mismatched descriptions requiring correction.
 
-
-**2.3.1. Issues with Claim Type into an Indicator**
+### 2.3.1 Issues with Claim Type into an Indicator
 
 The claim_type column contained duplicate records where 'I' (initial claim) and 'O' (other claim) values represented the same entry. 
 A transformation was applied to the claim_type variable to convert ‘I’ values into an indicator while handling duplicate rows:
@@ -205,7 +226,7 @@ A transformation was applied to the claim_type variable to convert ‘I’ value
 - Duplicate entries caused by claim_type variations were identified and removed to ensure data integrity.
 
 
-**2.3.2. Non- Standardized City Names**
+### 2.3.2. Non-Standardized City Names
 
 The City names were not standardazied in a specific format. To ensure consistency in geographic analysis, city names were normalized by:
 - Trimming whitespace to remove unwanted spaces.
@@ -213,10 +234,8 @@ The City names were not standardazied in a specific format. To ensure consistenc
 - Correcting hyphenation inconsistencies (e.g., "Al Khobar" → "Al-Khobar").
 - Creating a lookup table to store standardized city names for reusability.
 
-
-
-- 
-**2.4.4. Intermediate Quality Report & Documentation**
+ 
+### 2.4.4 Intermediate Quality Report & Documentation
 
 All flagged quality issues were documented and saved for further analysis. This included:
 
@@ -226,10 +245,7 @@ All flagged quality issues were documented and saved for further analysis. This 
 
 A summary of member_code groupings was saved in non_unique_member_codes.csv for further verification and future analytical segmentation.
 
-
-
-\newpage
-
+<div style="page-break-after: always;"></div>
 
 # 3. Feature Engineering & Feature Store
 
@@ -237,10 +253,10 @@ A summary of member_code groupings was saved in non_unique_member_codes.csv for 
 This section outlines the structured process of transforming raw data into analytical features, ensuring consistency, standardization, and usability for downstream modeling and analysis. The approach follows a layered transformation method, converting raw attributes into structured feature tables.
 Note: Feature engineering is an iterative process that evolves based on exploratory analysis. While this report presents feature creation before descriptive analytics for clarity, the actual process involved analyzing data gaps, transforming variables, and iterating based on insights.
 
+---
 ## 3.2 Key Data Transformations & Feature Creation
 
-
-***3.2.1 Creating Unique Identifiers***
+### 3.2.1 Creating Unique Identifiers
 
 To ensure accurate individual tracking while preserving privacy, a unique identifier was created by combining:
 - policy_number
@@ -250,37 +266,38 @@ To ensure accurate individual tracking while preserving privacy, a unique identi
 
 This identifier allows differentiation of individuals within the same policy while enabling household-level analysis.
 
-***3.2.2 Numerical to Categorical Transformations***
+### 3.2.2 Numerical to Categorical Transformations
 
 To enhance interpretability and improve modeling performance, numerical variables were categorized into meaningful groups:
 
-| Feature                  | Categories                                      |
-|--------------------------|------------------------------------------------|
-| **Age Group (age_group)** | 10-year intervals (e.g., 0-9, 10-19, 20-29, …, 80+) |
-| **BMI Category (bmi_cat)** | - Underweight (<18.5) <br> - Healthy (18.5–24.9) <br> - Overweight (25–29.9) <br> - Obese (≥30) |
-| **Obesity Class (obesity_cat)** | - Class 1 (30–34.9) <br> - Class 2 (35–39.9) <br> - Class 3 (≥40) |
+| Feature                         | Categories                                                                                      |
+|---------------------------------|-------------------------------------------------------------------------------------------------|
+| **Age Group (age_group)**       | 10-year intervals (e.g., 0-9, 10-19, 20-29, …, 80+)                                             |
+| **BMI Category (bmi_cat)**      | - Underweight (<18.5) <br> - Healthy (18.5–24.9) <br> - Overweight (25–29.9) <br> - Obese (≥30) |
+| **Obesity Class (obesity_cat)** | - Class 1 (30–34.9) <br> - Class 2 (35–39.9) <br> - Class 3 (≥40)                               |
 
 These categorizations allow for comparative risk analysis across different patient groups.
 
 
-***3.2.3 Grouping Cities with low counts into "Other" ***
+### 3.2.3 Grouping Cities with low counts into "Other" 
 
 In addition to cleaning the city names a new variable was created "Major City". The variable categorizing cities based on the top 5 cities by unique patient count, the remaining cities were labeled "Other" including rows with an "Unknown" vit value.
+---
 
 ## 3.3 Extracting Feature Tables
 
 To enhance data accessibility, key feature tables were created for streamlined analysis:
 
-| Feature Table               | Description                                                        |
-|-----------------------------|--------------------------------------------------------------------|
-| **Diabetes Type Table**      | Aggregates diabetes classification based on ICD-10 codes per unique identifier. |
-| **Comorbidity Table**        | Stores Charlson Comorbidity Index scores per unique identifier.  |
-| **Diabetes Feature Table**   | Captures diabetes-specific indicators, including treatment intensity. |
-| **Family Size Table**        | Groups members under the same policy to determine household size. |
-| **Unique Identifier Table**  | Stores transformed IDs for downstream merging and validation.    |
-| **ICD-1 Lookup Table**       | A lookup table to stode the ICD-10 descriptions.    |
+| Feature Table               | Description                                                                     |
+|-----------------------------|---------------------------------------------------------------------------------|
+| **Diabetes Type Table**     | Aggregates diabetes classification based on ICD-10 codes per unique identifier. |
+| **Comorbidity Table**       | Stores Charlson Comorbidity Index scores per unique identifier.                 |
+| **Diabetes Feature Table**  | Captures diabetes-specific indicators, including treatment intensity.           |
+| **Family Size Table**       | Groups members under the same policy to determine household size.               |
+| **Unique Identifier Table** | Stores transformed IDs for downstream merging and validation.                   |
+| **ICD-1 Lookup Table**      | A lookup table to stode the ICD-10 descriptions.                                |
 
-
+---
 ## 3.4 Storing Features for Reuse
 - Engineered features were saved in structured feature tables to facilitate efficient retrieval, reuse, and analysis.
 - Outputs were stored in a feature store using Parquet format for optimized storage and column type consistency.
@@ -291,7 +308,7 @@ Feature tables will be used to streamline the modeling process by providing pre-
 
 note: not all the features may be used in future analysis. 
 
-\newpage
+<div style="page-break-after: always;"></div>
 
 
 # 4 Reports: City Level Analysis Report 
@@ -312,48 +329,53 @@ Ultimately, this analysis seeks to identify any significant patterns that could 
 
 There is a significant relationship between the `number of diabetes complications claims` and the `city` in which the patients reside. The analysis will explore whether certain cities experience higher rates of complications, potentially influenced by demographic factors like `age`, `sex`, `BMI`, and `comorbidities`.
 
+
+
 ## 4.2 Methodology
 
-In the following section we demonstrate the steps for conducting the analysis, model building and validation.
+This section outlines the steps for conducting the analysis, model building, and validation.
+
+1. Data Extraction: Data is extracted from the feature store, ensuring consistency and accessibility for analysis.
+2. Exploratory Data Analysis (EDA): A comprehensive analysis is performed, including:
+   - Summary Statistics: To provide an overview of key variables.
+   - Univariate Analysis: To analyze the distribution of individual variables.
+   - Bivariate Analysis: To examine relationships between pairs of variables.
+   - Multivariate Analysis: To explore interactions between multiple variables.
+   - Correlation Analysis: To identify significant correlations between variables.
+3. Model Building: The appropriate modeling techniques are selected based on the analysis.
+4. Model Selection: The best-fitting model is chosen based on evaluation metrics such as AIC and BIC.
+5. Model Evaluation: The model’s performance is assessed using metrics such as log-likelihood, pseudo-R², and other relevant statistical tests, along with residual diagnostics to check for model assumptions and ensure the reliability of the model.
 
 ## 4.3 Data Extraction
 
-Using the feature store we extracted the `city_comp_df` which is a data sets the focuses on the demographic and calims summary at the individual level. The data sets containg the target variable of interest `number of diabetes reported diabetes complications` , the main explanatory vriable `city` and other important variables including `age`, `bmi`, `number of comorbiditeis`, `type of diabetes reported` and `total number of diabetes reported`:
+Using the feature store, we extracted the dataset `city_comp_df`, which focuses on individual-level demographics and claims summaries. The dataset includes the target variable of interest, number of reported diabetes complications, the main explanatory variable, city, and other key variables such as age, BMI, number of comorbidities, type of diabetes reported, and total number of diabetes reported. Below is a description of the variables included in the dataset:
 
+| #  | Column              | Description                                                         | Dtype    |
+|----|---------------------|---------------------------------------------------------------------|----------|
+| 0  | unique_id           | Unique identifier for an individual                                 | object   |
+| 1  | policy_number       | Policy number                                                       | int64    |
+| 2  | member_code         | Member code                                                         | int64    |
+| 3  | age_cat             | Age in category                                                     | category |
+| 4  | age                 | Age in years                                                        | int64    |
+| 5  | gender              | Gender category                                                     | category |
+| 6  | max_bmi             | Maximum BMI recorded                                                | float64  |
+| 7  | max_bmi_cat         | Maximum BMI in category                                             | category |
+| 8  | max_major_city      | Most city by claims for an individual using the Major city category | object   |
+| 9  | E09                 | ICD code for Impaired glucose regulation                            | float64  |
+| 10 | E10                 | ICD code for type 1 diabetes mellitus                               | float64  |
+| 11 | E11                 | ICD code for type 2 diabetes mellitus                               | float64  |
+| 12 | E12                 | ICD code for malnutrition-related diabetes mellitus                 | float64  |
+| 13 | E13                 | ICD code for other specified diabetes mellitus                      | float64  |
+| 14 | E14                 | ICD code for unspecified diabetes mellitus                          | float64  |
+| 15 | total_complications | Total number of diabetes complications claims                       | int64    |
+| 16 | total_comorbidities | Total number of comorbidities claims                                | int64    |
+| 17 | has_icd_dm          | Indicator if the individual has any ICD diabetes                    | int64    |
+| 18 | total_dm_icd        | Total number of diabetes ICD codes reported                         | int64    |
 
-| #   | Column               | Description                                      | Dtype    |
-|-----|----------------------|--------------------------------------------------|----------|
-| 0   | unique_id            | Unique identifier for an individual              | object   |
-| 1   | policy_number        | Policy number                                    | int64    |
-| 2   | member_code          | Member code                                      | int64    |
-| 3   | age_cat              | Age in category                                     | category |
-| 4   | age                  | Age in years                            | int64    |
-| 5   | gender               | Gender category                         | category |
-| 6   | max_bmi              | Maximum BMI recorded                             | float64  |
-| 7   | max_bmi_cat          | Maximum BMI in category                             | category |
-| 8   | max_major_city       | Most city by claims for an individual using the Major city category                          | object   |
-| 9   | E09                  | ICD code for Impaired glucose regulation | float64  |
-| 10  | E10                  | ICD code for type 1 diabetes mellitus            | float64  |
-| 11  | E11                  | ICD code for type 2 diabetes mellitus            | float64  |
-| 12  | E12                  | ICD code for malnutrition-related diabetes mellitus | float64  |
-| 13  | E13                  | ICD code for other specified diabetes mellitus   | float64  |
-| 14  | E14                  | ICD code for unspecified diabetes mellitus       | float64  |
-| 15  | total_complications  | Total number of diabetes complications claims  | int64  |
-| 16  | total_comorbidities  | Total number of comorbidities claims                  | int64  |
-| 17  | has_icd_dm           | Indicator if the individual has any ICD diabetes | int64    |
-| 18  | total_dm_icd         | Total number of diabetes ICD codes reported      | int64  |
-
+<div style="page-break-after: always;"></div>
 
 ## 4.4 Exploratory Data Analysis
 
-Next, we conduct the following data explorations including `summary statistics`, `univariate analysis`, `bivariate analysis including correlations`, `multivariate analysis`.
-
-
-Summarizing key findings from this part—e.g., correlations between variables like BMI and diabetes complications—would provide a stronger foundation for your predictive modeling.
-It would be beneficial to include the following:
-- Distribution of critical variables (e.g., age, BMI, and Charlson comorbidity index).
-- Correlation matrix showing relationships between key variables.
--  Any outliers or trends identified in the data.
   
 *Summary Statistics of numerical variables*
 
@@ -374,14 +396,14 @@ On average, individuals have 1.28 reported diabetes complications of which 25% o
 *Total complications*
 In addition around 35% of the population have no reported complication while 31% have 1 repoted complication [not shown in the previous table].
 
-Zero inflated distribution might affect the Poisson regression assumpation. Need to test for it.
+The distribution [image] shows a right-skewed pattern with a significant number of individuals reporting zero complications, followed by smaller frequencies for higher counts of complications. This suggests that most individuals experience low complication rates. The zero-inflated distribution indicates that many individuals report no complications, which should be considered when modeling (Poisson regression assumptions may be affected by the excess of zeros).
 
-![alt text](image-15.png)
+![Complications Distribution](image-15.png)
 
 
 *City counts*
 
-Jeddah has the highest count of individuals, representing 35.67% of the total population, followed by Riyadh. The 'Other' city goroup represents 23.52% of the population.
+Jeddah has the highest count of individuals, representing 35.67% of the total population, followed by Riyadh. The 'Other' city goroup represents 23.52% of the population. This distribution shows a disproportionate representation of cities, with Jeddah and Riyadh having a significant portion of the data.
 
 | Category | Count | Percentage |
 |----------|-------|------------|
@@ -393,12 +415,12 @@ Jeddah has the highest count of individuals, representing 35.67% of the total po
 | Other    | 4397  | 23.52      |
 
 
-![alt text](image-13.png)
+![City counts](image-13.png)
 
 
 *Age Distribution*
 
-The age distribution largely follows a normal pattern, with noticeable increases in counts after the ages of 50 and 60. The largest proportion of the population falls within the 60-69 age group, representing 66.60% of the population, followed by the 70-79 age group at 20.31%. The average age is 64.7 years. The 50-59 age group accounts for 9.79%, while other age groups each represent less than 2% of the population.
+The age distribution is right-skewed, with noticeable increases in counts after the ages of 50 and 60. The largest proportion of the population falls within the 60-69 age group, representing 66.60% of the population, followed by the 70-79 age group at 20.31%. The average age is 64.7 years. The 50-59 age group accounts for 9.79%, while other age groups each represent less than 2% of the population.
 
 
 | Category | Count | Percentage |
@@ -414,14 +436,14 @@ The age distribution largely follows a normal pattern, with noticeable increases
 | 90-99    | 25    | 0.13       |
 | 100-109  | 1     | 0.01       |
 
-![alt text](image-5.png)
+![Age distribution](image-5.png)
 
-![alt text](image-4.png)
+![Age category disribution](image-4.png)
 
 
 ***BMI Distribution***
 
-The following table shows the distrubition of BMI
+The BMI distribution is right-skewed, with a majority of individuals (> 77%) falling within the overweight and obese categories.
 
 | Category    | Count | Percentage |
 |-------------|-------|------------|
@@ -431,50 +453,60 @@ The following table shows the distrubition of BMI
 | Obesity     | 8093  | 43.29      |
 
 
-![alt text](image-6.png)
-![alt text](image-7.png)
+![BMI distribution](image-6.png)
+![BMI category barsplot](image-7.png)
 
 
 
 *comorbidities*
 
-The majority of individuals have 1 comorbditiy followed byy none and 2.
+The majority of individuals have one comorbidity, followed by a smaller portion with zero comorbidities and few with more than on.
 
 ![alt text](image-16.png)
 
 *Total reported diabetes type per patient*
 
-The majority of individuals have only 1 reported diabets diagnosis, while a large proportion of individuals have no reported diabetes type (plausabile explanation is that this is a sampled from a larger claims data set and individuals with a diabetes claim might not be within the smaples extracted).
+The majority of individuals have one reported diabets diagnosis, while a large proportion of individuals have no reported diabetes type (plausabile explanation is that this is a sampled from a larger claims data set and individuals with a diabetes claim might not be within the smaples extracted).
 
 ![alt text](image-14.png)
 
+<div style="page-break-after: always;"></div>
 
-***Correlations Analysis***
+*Correlations Analysis*
 
-Diabetes type (E10, E11, E13), comorbidities, and the number of diabetes-related ICD codes are the strongest predictors of total complications.
-City does not appear to be a strong determinant of diabetes complications, with Jeddah being the only city showing a moderate positive correlation. Age showes a weak negative correlation while BMI, and comorbidities also show weak positive association with complications. 
-
-The number of diabetes-related ICD codes is correlated with ICD codes of diabetes which is logical since it is derived from the sum of all diabetes related ICD codes reported for and individual.
+Total complications is positively correlated with E10, E11, and E13 (types of diabetes), indicating that individuals with these diagnoses tend to have more complications.
+There is a strong correlation between total complications and total DM ICD codes. City vairables show a weak correlation with total diabetes complications, with Jeddah being the only cities showing a moderate positive correlation. Age showes a weak negative correlation while BMI, and comorbidities also show weak positive association with complications. 
 
 ![alt text](image-24.png)
 
-- Explore the relationship between outcome var and main explanatory of city individualy and across other vars
 
-***By city and Gender***
+*Total Complications by City*
 
-no visible difference in the distribution of total complications between cities stratified by gender. However, female patients showed a highers level of variability vs males except for Jeddah and Madina.
+The boxplot shows the distribution of total diabetes complications across cities. There is no clear difference in the total complications across cities.
 
-![alt text](image-20.png)
+![boxplot city](image-30.png)
 
-- examine the relationship between outcome var and other explanatory var  [vs age, vs bmi, vs # comorbity, vs diabetes type, ]
+There is no visible difference in the distribution of total complications between cities when stratified by gender. However, female patients exhibit higher variability in complication levels compared to males, except in AlKhobar and Madina, where the variability between genders appears similar. this may suggest that gender may influence the degree of complications, with women having more variance in the total complications.
 
-- examine the relationship between explanatory var with each other and test for colinearity [age vs bmi, # comorbity  vs # complications, ag]
+![boxplot city by gender](image-31.png)
 
+When stratifying across bmi groups we observe that higher BMI (especially obesity) is linked to more total complications compared to healthyacross cities, and underweight individuals also show a slight tendency for higher complications but with less variability, though this relationship is weak.
+
+![boxplot city by bmi cat](image-35.png)
+
+More comorbidities are associated with higher total diabets complications across cities.
+
+![boxplot city by comorbidities](image-33.png)
+
+There is a very strongassociation between increasing number of different diabetes diagnosis on an individual and the total diabetes comorbidities. This association is consistant across all cities. 
+
+![boxplot city by total reported diabetes types](image-34.png)
+
+<div style="page-break-after: always;"></div>
 
 
 ## 4.5 Modeling
 
-The methodology for this analysis begins with retrieving the necessary data from the feature store, which houses the engineered features required for our exploratory data analysis (EDA) and modeling. The feature store allows for efficient access to transformed data, ensuring consistency and facilitating reproducibility in our analysis.
 
 
 ### 4.5.1 : Choosing Model
@@ -498,26 +530,25 @@ Decision trees, Random Forests, or XGBoost if you want to show a machine learnin
   - Cross-validation scores to ensure robustness of the model.
 
 
-| Coefficient | Intercept | Model 1 | Model 2 | Model 3 |Model 4 |
-|-------------|-------------------------|------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| inflate_const | -1.550*** (0.031) | -1.686*** (0.034) | -1.819*** (0.037) | -1.898*** (0.040) | -14.902 (87.362) |
-| Intercept | 0.440*** (0.007) | 0.270*** (0.014) | 0.996*** (0.072) | 0.859*** (0.072) | -0.346*** (0.068) |
-| City = Alkhobar | | 0.205*** (0.034) | 0.194*** (0.034) | 0.183*** (0.034) | 0.237*** (0.032) |
-| City = Jeddah | | 0.308*** (0.018) | 0.302*** (0.018) | 0.260*** (0.018) | 0.132*** (0.017) |
-| City = Madina | | 0.135*** (0.039) | 0.126*** (0.038) | 0.067* (0.038) | -0.002 (0.035) |
-| City = Makkah | | 0.273*** (0.038) | 0.220*** (0.038) | 0.167*** (0.038) | 0.194*** (0.035) |
-| City = Other | | -0.005 (0.021) | -0.007 (0.021) | -0.019 (0.021) | -0.017 (0.020) |
-| Gender = M | | | 0.054*** (0.014) | 0.011 (0.015) | 0.058*** (0.014) |
-| Age | | | -0.017*** (0.001) | -0.017*** (0.001) | -0.010*** (0.001) |
-| BMI | | | 0.011*** (0.001) | 0.009*** (0.001) | 0.006*** (0.001) |
-| Total Comorbidities | | | | 0.205*** (0.009) | 0.135*** (0.008) |
-|  Total DM Types claimed | | | | | 0.617*** (0.008) |
-|||
-| N | 18694 | 18694 | 18694 | 18694 | 18694 |
-| AIC | 58166.836 | 57748.263 | 57324.429 | 56792.155 | 51987.466 |
-| BIC | 58182.508 | 57803.114 | 57402.789 | 56878.351 | 52081.497 |
+| Coefficient            | Intercept         | Model 1           | Model 2           | Model 3           | Model 4           |
+|------------------------|-------------------|-------------------|-------------------|-------------------|-------------------|
+| inflate_const          | -1.550*** (0.031) | -1.686*** (0.034) | -1.819*** (0.037) | -1.898*** (0.040) | -14.902 (87.362)  |
+| Intercept              | 0.440*** (0.007)  | 0.270*** (0.014)  | 0.996*** (0.072)  | 0.859*** (0.072)  | -0.346*** (0.068) |
+| City = Alkhobar        |                   | 0.205*** (0.034)  | 0.194*** (0.034)  | 0.183*** (0.034)  | 0.237*** (0.032)  |
+| City = Jeddah          |                   | 0.308*** (0.018)  | 0.302*** (0.018)  | 0.260*** (0.018)  | 0.132*** (0.017)  |
+| City = Madina          |                   | 0.135*** (0.039)  | 0.126*** (0.038)  | 0.067* (0.038)    | -0.002 (0.035)    |
+| City = Makkah          |                   | 0.273*** (0.038)  | 0.220*** (0.038)  | 0.167*** (0.038)  | 0.194*** (0.035)  |
+| City = Other           |                   | -0.005 (0.021)    | -0.007 (0.021)    | -0.019 (0.021)    | -0.017 (0.020)    |
+| Gender = M             |                   |                   | 0.054*** (0.014)  | 0.011 (0.015)     | 0.058*** (0.014)  |
+| Age                    |                   |                   | -0.017*** (0.001) | -0.017*** (0.001) | -0.010*** (0.001) |
+| BMI                    |                   |                   | 0.011*** (0.001)  | 0.009*** (0.001)  | 0.006*** (0.001)  |
+| Total Comorbidities    |                   |                   |                   | 0.205*** (0.009)  | 0.135*** (0.008)  |
+| Total DM Types claimed |                   |                   |                   |                   | 0.617*** (0.008)  |
+| N              | 18694      | 18694      | 18694      | 18694      | 18694      |
+| AIC            | 58166.836  | 57748.263  | 57324.429  | 56792.155  | 51987.466  |
+| BIC            | 58182.508  | 57803.114  | 57402.789  | 56878.351  | 52081.497  |
 | Log-Likelihood | -29081.418 | -28867.131 | -28652.215 | -28385.078 | -25981.733 |
-| Pseudo R2 | 0.000 | 0.007 | 0.015 | 0.024 | 0.107 |
+| Pseudo R2      | 0.000      | 0.007      | 0.015      | 0.024      | 0.107      |
 
 *Notes:*
 Standard errors in parentheses [** p<.05, ***p<.01]
@@ -552,6 +583,9 @@ Residual diagnostics of model 4
   - Other modeling techniques ()
   - Add more data and variables for explainability
 
+<div style="page-break-after: always;"></div>
+---
+
 ## 4.6 : Results
 Interpretability and Insights:
 - Explainability is critical in healthcare data:
@@ -570,6 +604,9 @@ Strategic Recommendations: Based on the insights, propose strategies for improvi
 
 **Emphasizing the Business Value: While you've done a good job focusing on technical aspects, be sure to tie back findings and recommendations to the business or healthcare outcomes.**
 
+<div style="page-break-after: always;"></div>
+---
+
 ## 4.7 : Discussion and Limitations
 This section is crucial for reflecting on the analysis. You should address:
 - Model Assumptions: Were any assumptions (e.g., for Poisson regression) violated, and how did you handle them? For example, if the Poisson model assumption of mean variance doesn’t hold, how did you adjust (e.g., switching to a Negative Binomial model)?
@@ -587,6 +624,7 @@ This section is crucial for reflecting on the analysis. You should address:
 - Model Limitations: Are there any limitations of the model that could affect its generalizability or applicability in real-world decision-making?
   - The model had a poor fit and low variance explainability score
   - 
+---
 
 ## 4.8 : Next Steps
 Further Analysis: What additional analyses could be conducted to build on this model? You could consider:
@@ -595,6 +633,7 @@ Further Analysis: What additional analyses could be conducted to build on this m
 - Incorporating time-series data (if available) for longitudinal predictions.
 - Data Collection and Enhancements: Propose further data collection that could enhance the modeling process, such as more granular data on lifestyle factors, treatments, etc.
 - Model Deployment: If the model is deemed reliable and useful, discuss potential deployment into real-world applications (e.g., integrating with healthcare systems for predicting claims).
+---
   
 ## 4.9 : Conclusion
 The conclusion should summarize the key takeaways from the analysis:
