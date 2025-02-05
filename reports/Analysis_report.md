@@ -39,9 +39,8 @@
   - [4.4 Exploratory Data Analysis](#44-exploratory-data-analysis)
   - [4.5 Modeling](#45-modeling)
     - [4.5.1 : Choosing Model](#451--choosing-model)
-    - [4.5.2 : Comparing Models](#452--comparing-models)
-    - [4.5.3 : Model Results](#453--model-results)
-    - [4.5.4 : Model Diagnostics](#454--model-diagnostics)
+    - [4.5.2 : Model building](#452--model-building)
+    - [4.5.3 : Model Results \& Diagnostics](#453--model-results--diagnostics)
   - [](#)
   - [4.6 : Results](#46--results)
   - [](#-1)
@@ -507,27 +506,44 @@ There is a very strongassociation between increasing number of different diabete
 
 ## 4.5 Modeling
 
-
-
 ### 4.5.1 : Choosing Model
-This section is critical because it explains why you chose a particular modeling technique over others. You might want to expand on:
-- Rationale: Why Poisson regression? Was it due to the nature of the data (count data for diabetes complications)? Were there other methods considered (e.g., Negative Binomial, Logistic Regression for binary outcomes)?
-- Assumptions: Discuss any assumptions the model makes. For Poisson regression, you can talk about the assumption of equal variance and mean. If those assumptions don't hold, you might need to discuss the need for a different model (e.g., Negative Binomial for overdispersed data).
-- Model Selection Criteria: What was the key factor for selecting the model (predictive power, interpretability, handling of specific types of data, etc.)?
+The selection of the model was driven by several crucial factors:
 
-### 4.5.2 : Comparing Models
-This section should provide a comparison of multiple models, and the following points might be helpful:
-- Baseline Model: Start with a simple baseline model (e.g., univariate regression with just one predictor). This will help you assess the improvement when adding more features.
-- Additional Models: Compare the chosen model (Poisson regression) with alternatives like:
-A simple linear regression (if the outcome were continuous),
-Generalized Linear Models (GLM) with a different distribution (e.g., Negative Binomial),
-Decision trees, Random Forests, or XGBoost if you want to show a machine learning approach.
-- Model Metrics: Evaluate each model based on common performance metrics such as:
-  - AIC/BIC (for model comparison),
-  - Log-likelihood,
-  - Deviance (for Poisson models),
-  - RMSE, R-squared, or other appropriate metrics depending on the model type.
-  - Cross-validation scores to ensure robustness of the model.
+- Nature of the Analysis: Our analysis is primarily focused on hypothesis testing, where explainability is prioritized over pure predictive performance. The goal is to understand the key factors driving diabetes complications, rather than solely optimizing predictive accuracy. This necessitated the choice of a model that would provide both insight and interpretability of the results.
+
+- Count Nature of the Target Variable: The target variable, total diabetes complications, represents count data (i.e., the number of complications per individual). This type of outcome is naturally suited for count regression models. Given the characteristics of our target variable, we considered models such as Poisson regression, which is commonly used for modeling count data.
+
+- Model Assumptions: Poisson regression assumes equidispersion, where the mean and variance of the outcome variable are equal. However, in practice, this assumption may not always hold, especially in datasets with significant skewness or excess zeros.
+
+**Assumption Checks:**
+
+To test whether the assumptions of Zero-Inflation and Equidispersion hold, we performed the following checks:
+
+1. Zero-Inflation:
+   - We examined summary statistics for the number of claims and calculated the percentage of zero claims.
+   - A visual inspection of the histogram of the number of claims was also conducted to assess the presence of a large number of zeros, which is indicative of zero-inflation.
+2. Dispersion Statistic:
+   - We calculated the variance-to-mean ratio. A value greater than 1 suggests overdispersion (where the variance exceeds the mean), indicating that Poisson regression might not be the most suitable model. The dispersion statistic for the dataset was 1.56, which is greater than 1, indicating overdispersion (see below image). This overdispersion is likely driven by the large number of zero values (many individuals reporting no complications).
+
+To address this, we compared two potential models: the Zero-Inflated Poisson (ZIP) model and the Zero-Inflated Negative Binomial (ZINB) model. Although the ZINB model would theoretically provide a better fit due to its ability to handle overdispersion, it failed to converge during model fitting. As a result, we proceeded with the Zero-Inflated Poisson (ZIP) model.
+
+![alt text](image-36.png)
+
+
+### 4.5.2 : Model building
+
+Following the model selection process, several models of increasing complexity were built to analyze the factors influencing total diabetes complications. The models are compared based on their goodness of fit, AIC, BIC, and Pseudo R² values.
+
+The models built include:
+- Model 1: A basic model with city-level effects.
+- Model 2: Adds gender, age and BMI as additional predictors.
+- Model 3: Adds total comorbidities as additional predictors.
+- Model 4: Adds the total diabetes types claimed.
+
+Model Comparison Criteria:
+- Goodness of Fit: This is assessed by examining how well the model fits the data.
+- AIC and BIC: Lower values indicate better model fit, with Model 4 performing best across both metrics.
+- Pseudo R²: This metric increases with model performance, and Model 4 achieves the highest Pseudo R² value (0.107), indicating the best fit and explanatory power.
 
 
 | Coefficient            | Intercept         | Model 1           | Model 2           | Model 3           | Model 4           |
@@ -553,20 +569,21 @@ Decision trees, Random Forests, or XGBoost if you want to show a machine learnin
 *Notes:*
 Standard errors in parentheses [** p<.05, ***p<.01]
 
-### 4.5.3 : Model Results
+### 4.5.3 : Model Results & Diagnostics
 
-Summarize the key results of the modeling in this section:
-- We present 4 models with increasing complexity as presented in the following table
-- The model with highest explainability (model 4)
-- The variability explained (low)
-- The findings
-  - Cities coefficient comparison
-  - Other important variables
-- Overal model performance
-- Model performance: How well did the model perform in terms of goodness of fit and predictive power? Show key statistics such as AIC, BIC, and deviance residuals.
-- Model diagnostics: Were there any issues detected (e.g., residuals, goodness of fit, cross-validation results, outliers, multicollinearity)? (next sections)
+After comparison of the models the model with highest proportion of total variability explained (Psuedo R2 = 0.107) was model 4. However, the explainability is in general low. The model also showed the lowest AIC (51987.466) and BIC (52081.497), indicating the best fit among the models. 
+ 
+In terms of model diagnostics the following were observed:
 
-### 4.5.4 : Model Diagnostics
+*conclusion*
+- The residuals vs fitted values show a residuals not randomly distributed
+- The QQ plot shows deviation from the straight line indicating the residuals dont follow a normal distribution.  
+- The histogram of residuals show a skewed distribution with a peak around zero, suggesting that the residuals are not symmetrically distributed
+- 
+ Recommendation: 
+  - Transformation (difficult since this is count variabel)
+  - Other modeling techniques ()
+  - Add more data and variables for explainability
 
 Residual diagnostics of model 4
 
@@ -574,14 +591,6 @@ Residual diagnostics of model 4
 ![alt text](image-22.png)
 ![alt text](image-23.png)
 
-*conclusion*
-- Significant deviation at the tails
-- residuals not randomly distributed
-- The model does not show overall fit
-- Recommendation: 
-  - Transformation (difficult since this is count variabel)
-  - Other modeling techniques ()
-  - Add more data and variables for explainability
 
 <div style="page-break-after: always;"></div>
 ---
