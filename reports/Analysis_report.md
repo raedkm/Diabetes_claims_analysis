@@ -34,11 +34,21 @@
 ---
 
 # 0. Executive Summary
-This report presents an in-depth analysis of a diabetic population claims dataset to assess data quality, identify key trends, and apply advanced analytical techniques. The report outlines preprocessing steps, descriptive analytics, feature engineering, machine learning applications, and strategic recommendations for improving data usability and deriving actionable insights. The findings will support better decision-making in healthcare claims management.
+This report presents an analysis of a diabetes claims dataset to showcase the candidate’s expertise in analytics, 
+reasoning, and technology. The project follows best practices in data engineering, feature engineering, and 
+model development to generate actionable healthcare insights.
 
+The approach employs a structured data engineering process that ensures data integrity and quality, with a feature store as a 
+key element providing consistency and reusability across models, improving efficiency and reproducibility.
+
+The primary hypothesis proposed that city-level location significantly influences the occurrence of diabetes complications. This hypothesis is supported by strong scientific evidence suggesting that the built environment—factors like urban design, access to healthcare, and lifestyle—can have a substantial impact on long-term health outcomes. To test this, a Zero-Inflated Poisson (ZIP) regression model was selected for its ability to handle zero-inflation and its focus on explainability. The model aimed to predict the number of reported diabetes complication claims per patient, with city location as the main explanatory variable, while controlling for important variables such as age, gender, BMI, and comorbidities.
+
+The results revealed significant differences in complication rates across cities, with Jeddah and Alkhobar exhibiting higher rates than Riyadh. Additionally, the model highlighted a strong association between the number of comorbidities and complications, as well as between the number of different diabetes types claimed on a patient and the total number of diabetes complications.
+
+Based on these findings, several strategic recommendations are suggested. These include implementing targeted interventions in cities like Jeddah and Alkhobar, where higher complication rates were observed. Furthermore, enhancing data collection—particularly by incorporating factors such as socioeconomic status and lifestyle—could improve the model’s predictive accuracy and provide more personalized insights to inform healthcare planning.
 <div style="page-break-after: always;"></div>
 
----
+
 # 1. Technical Report Overview
 
 ## 1.1 Project Aim
@@ -73,7 +83,7 @@ In contrast to traditional siloed approaches, the modular pipeline enables paral
 The pipeline includes the following stages:
 
 - Data Extraction: Automated extraction from various sources like databases, APIs, and live events.
-- Data Preprocessing: Data cleaning, validation, and initial EDA.
+- Data Preprocessing: Dat ingestion, data cleaning, validation, and initial EDA.
 - Feature Engineering: Creation of features stored in the `feature store` for future use.
 - Modeling and Reporting: Teams extract data from the `feature store`, build models, and perform hypothesis testing.
 - Model Deployment & Monitoring: Final model deployment for generating predictive insights and supporting decision-making.
@@ -87,29 +97,29 @@ The pipeline includes the following stages:
 # 2. Preprocessing Steps
 
 ## 2.1 Data Ingestion
-<!-- ![Age Distribution](age_distribution.png) -->
+
 The raw layer ingests CSV files while enforcing schema validation. This ensures that each column maintains the correct data type, preventing inconsistencies in downstream processing. The data is then converted to Parquet format for storage efficiency and type preservation.
 
 **_Schema Validation and Column Standardization_**
 
-To ensure data integrity, the ingestion process applies:
+To ensure data integrity, the ingestion process applies the following:
 - Explicit data type enforcement using a predefined dictionary.
 - Column renaming for consistency across analysis stages.	
-- Initial data validation to verify data types and structure.
+- Initial data validation to verify data types and structure [not done in this case].
 
 ```python
 # Define the data types for each column in the dataset
 dtype_dict = {
-    "MEMBER_CODE": "int64",    # De-identified member ID, stored as float to match dataset format
+    "MEMBER_CODE": "int64",    # De-identified member ID
+    "POLICY_NO": "int64",       # Policy number,  as integer
     "Age": "int64",             # Age of the member
-    "GENDER": "category",       # Gender is a categorical variable
-    "POLICY_NO": "int64",       # Policy number, stored as integer
-    "CMS_Score": "int64",       # Charlson comorbidity index score, stored as integer
-    "ICD_CODE": "category",     # ICD-10 codes are categorical
-    "ICD_desc": "string",       # ICD-10 description as a string
-    "City": "string",           # City as a string, handling missing values separately
-    "CLAIM_TYPE": "category",   # Claim type is categorical
     "BMI": "float64"            # BMI as a float
+    "GENDER": "category",       # Gender as categorical 
+    "CMS_Score": "int64",       # Charlson comorbidity index score, as integer
+    "ICD_CODE": "category",     # ICD-10 codes as categorical
+    "ICD_desc": "string",       # ICD-10 description as string
+    "City": "string",           # City as string
+    "CLAIM_TYPE": "category",   # Claim type is categorical
 }
 ```
 <div style="page-break-after: always;"></div>
@@ -119,6 +129,7 @@ dtype_dict = {
 column_lookup = {
     "MEMBER_CODE": "member_code",
     "Age": "age",
+    "BMI": "bmi"
     "GENDER": "gender",
     "POLICY_NO": "policy_number",
     "CMS_Score": "cms_score",
@@ -126,70 +137,68 @@ column_lookup = {
     "ICD_desc": "icd_description",
     "City": "city",
     "CLAIM_TYPE": "claim_type",
-    "BMI": "bmi"
 }
-# Load the dataset with specified data types
+# Load the dataset with specified data types and renaming the columns
 raw_data = pd.read_csv(raw_data_path, dtype=dtype_dict)
 
 ```
 
 **_Conversion to Parquet for Type Preservation_**
 
-After schema validation, the dataset is saved in `Parquet format` to maintain column types across different processing layers.
+After schema validation, the dataset is saved in `Parquet` format which has the benefit of maintaining data types across different processing layers and is more efficient in data storage.
+
+**Examination of the Raw data set**
+
+An initial examination of the raw data set is done here including examinig the dimensions of the data set (173772 rows and 10 columns), the data types of the columns,  inspecting the head and tails, the count of missing values per row for each column , and the number of unique values for each column. 
 
 ---
 ## 2.2 Data Cleaning
-- The average age of patients is {df['Age'].mean():.2f} years.
-- The dataset contains {df.shape[0]} rows and {df.shape[1]} columns.
 
-To ensure data consistency and integrity, a series of data cleaning steps were performed, including handling missing values, identifying and removing duplicates, and validating the dataset.
+To ensure data consistency and integrity, a series of data cleaning steps were performed, including identifying and handling missing values, identifying and removing duplicates, and validating the data values after cleaning.
 
-***2.2.1 Identifying Missing Data***
+***2.2.1 Identifying and Handling Missing Data***
 
-A summary of missing values was generated to assess completeness. The city column was identified as having 4,700 missing values, while other critical fields remained largely intact.
+A summary of missing values was generated to assess completeness. The city column was identified as having 4,700 missing values, the other columns did not contain any null values. Missing values in the city column were replaced with "Unknown".
 
-***2.2.2 Handling Missing Data***
+***2.2.2 Identifying and Handling Duplicates***
 
-The missing values in the city column were replaced with "Unknown" to retain records without introducing bias. Other imputation strategies, such as mean or mode imputation, were considered but were not required at this stage.
-
-
-***2.2.3 Checking for Duplicates***
-
-Duplicate records were reviewed to prevent redundant information.
-
-- Duplicate rows found: 2, which were removed.
-- The claim_type column exhibited duplication where records with an 'I' value had an identical counterpart with an 'O' value.
-  - 34,233 out of 34,235 records with claim_type = I had an identical entry with claim_type = O.
-  - These inconsistencies were flagged for further review and correction in subsequent processing stages.
-
-
-
-***2.2.4 Data Validation***
-
-Following the cleaning steps, a final validation was conducted to confirm:
-
-- No remaining missing values in critical columns.
-- No duplicate rows affecting dataset integrity.
-- Flagging of claim_type anomalies for further processing.
-
-This ensures the dataset is now structured, consistent, and ready for transformation in the next stage.
+For duplicates the following were identified
+- Two rows were identified as duplicates and one record was retained.
+- The claim_type column showed duplication where records with an 'I' & 'O' value had  identical values across all other columns in whichh 34,233 out of 34,235 records with claim_type = I had an identical entry with claim_type = O (the missing two rows are probably due to not being sampled).
+- To handle the duplicates rows, the claim type was converted to an indicator which = 1 if the claim_type = I, and 0 otherwise. Rows of the corrosponding claim_type = O were removed. 
 
 
 ## 2.4 Data Quality checks
-To ensure the dataset maintains logical consistency and accuracy, a series of data validation checks were conducted. These checks included logical value constraints, member data consistency assessments, and ICD code standardization. Any identified issues were documented for further analysis.
+To ensure the dataset maintains logical consistency and accuracy, a series of data validation checks were conducted. These checks included logical value constraints (e.g. age and bmi values), member data consistency assessments, and ICD code standardization. Any identified issues were documented for further analysis.
 
 ***2.4.1 Logical Value Checks***
 
-Key numerical and categorical variables were validated against predefined logical ranges:
-- age: Ensured all values fell within a plausible range (0–120 years).
-- bmi: Confirmed all BMI values were within a reasonable range (10–80).
-- gender: Ensured only expected categorical values ("M" or "F") were present.
+Key numerical and categorical variables were validated:
 
-*Suggestions: How will you handle outliers or incorrect values*
+***Age***
+
+- Tested that all values fell within the range (0–120 years).
+- No age value were out of the logical range
+
+***BMI***
+
+- Tested that  all values were within a reasonable range of (10–80). Values exceeding these may not necessarily be non-logical but may need further investigation.
+- There were 20 rows with values exceeding the upper limit of which 7 had a unique member_code and policy_number. The number is low we will ignore it for now.
+
+***Gender***
+
+Ensured only expected categorical values ("M" or "F") were present.
 
 ***2.4.2 Identifying Family Units Using member_code***
 
-Some member_code values are linked to individuals of different ages and genders, suggesting that member_code may represent family units rather than individual identifiers. For example, the same member_code appears for both male and female individuals of varying ages, indicating family-level grouping within policies. A unique identifier for individuals is created in the feature engineering section.
+Some member_code values are linked to individuals of different ages and genders, suggesting that member_code is not unique to an individual but may represent a family unit instead (see example below). To handle thie a unique identifier for individuals was created. This is described in detail in the feature engineering section.
+
+| policy_number | member_code | gender | age |
+|---------------|-------------|--------|-----|
+| 121           | 26730932    | M      | 78  |
+| 131           | 26730932    | F      | 72  |
+| 144           | 26730932    | M      | 71  |
+| 176           | 26730932    | F      | 67  |
 
 ***2.4.3 Correct code mapping***
 
@@ -199,57 +208,49 @@ An ICD-10 lookup table was created for icd_code and icd_description to:
 - Ensure consistency in ICD-10 codes across records.
 - Detect missing or mismatched descriptions requiring correction.
 
-***2.4.4 Issues with Claim Type into an Indicator***
-
-The claim_type column contained duplicate records where 'I' (initial claim) and 'O' (other claim) values represented the same entry. 
-A transformation was applied to the claim_type variable to convert ‘I’ values into an indicator while handling duplicate rows:
-- ‘I’ (Initial Claim) was transformed into a binary indicator variable.
-- Duplicate entries caused by claim_type variations were identified and removed to ensure data integrity.
+No ICD-10 code mismatch or duplication was found.
 
 
-***2.3.2. Non-Standardized City Names***
+***2.4.4 Non-Standardized City Names***
 
-The City names were not standardazied in a specific format. To ensure consistency in geographic analysis, city names were normalized by:
+The City names were not standardazied in a specific format [e.g. RIYADH vs Ibqaiq]. To ensure consistency in geographic analysis, city names were standarized by:
 - Trimming whitespace to remove unwanted spaces.
 - Converting names to title case (e.g., "RIYADH" → "Riyadh").
-- Correcting hyphenation inconsistencies (e.g., "Al Khobar" → "Al-Khobar").
 - Creating a lookup table to store standardized city names for reusability.
-
  
-***2.4.4 Intermediate Quality Report & Documentation***
+***2.4.5 Intermediate Quality Report & Documentation***
 
-All flagged quality issues were documented and saved for further analysis. This included:
+All flagged quality issues were documented and saved in a repot which included:
 
 - Entries with out-of-range values (e.g., unrealistic BMI or age values).
 - Household-based member_code groupings for further validation.
-- ICD code standardization inconsistencies.
-
-A summary of member_code groupings was saved in non_unique_member_codes.csv for further verification and future analytical segmentation.
+  
+A summary of member_code groupings was also saved in non_unique_member_codes.csv for reference.
 
 <div style="page-break-after: always;"></div>
 
 # 3. Feature Engineering & Feature Store
 
 ## 3.1 Overview of Data Transformations & Feature Engineering
-This section outlines the structured process of transforming raw data into analytical features, ensuring consistency, standardization, and usability for downstream modeling and analysis. The approach follows a layered transformation method, converting raw attributes into structured feature tables.
-Note: Feature engineering is an iterative process that evolves based on exploratory analysis. While this report presents feature creation before descriptive analytics for clarity, the actual process involved analyzing data gaps, transforming variables, and iterating based on insights.
+This section outlines the structured process of transforming raw data into analytical features for downstream modeling and analysis. The approach follows a layered transformation method, converting raw attributes into structured feature tables.
 
----
+*Note*: Feature engineering is an iterative process that evolves based on exploratory analysis. While this report presents feature creation before descriptive analytics for clarity, the actual process involved several iterations of exploratory data analysis, transformation and testing.
+
 ## 3.2 Key Data Transformations & Feature Creation
 
 ***3.2.1 Creating Unique Identifiers***
 
-To ensure accurate individual tracking while preserving privacy, a unique identifier was created by combining:
+As mentioned in the data quality section, the member code did not uniquely identify individuals. Therefore, a unique identifier was created by grouping rows using the following variables and assigning a unique number to each group:
 - policy_number
 - member_code
 - age
 - gender
 
-This identifier allows differentiation of individuals within the same policy while enabling household-level analysis.
+A total of 18,694 unique identifiers were generated. This identifier enables differentiation of individuals within the same policy for further analysis.
 
 ***3.2.2 Numerical to Categorical Transformations***
 
-To enhance interpretability and improve modeling performance, numerical variables were categorized into meaningful groups:
+The following numerical variables were categorized into meaningful groups:
 
 | Feature                         | Categories                                                                                      |
 |---------------------------------|-------------------------------------------------------------------------------------------------|
@@ -257,26 +258,42 @@ To enhance interpretability and improve modeling performance, numerical variable
 | **BMI Category (bmi_cat)**      | - Underweight (<18.5) <br> - Healthy (18.5–24.9) <br> - Overweight (25–29.9) <br> - Obese (≥30) |
 | **Obesity Class (obesity_cat)** | - Class 1 (30–34.9) <br> - Class 2 (35–39.9) <br> - Class 3 (≥40)                               |
 
-These categorizations allow for comparative risk analysis across different patient groups.
-
+These categorizations enable comparative analysis across different patient groups based on age, BMI, and obesity class.
 
 ***3.2.3 Grouping Cities with low counts into Other category***
 
-In addition to cleaning the city names a new variable was created "Major City". The variable categorizing cities based on the top 5 cities by unique patient count, the remaining cities were labeled "Other" including rows with an "Unknown" vit value.
-
+A new feature "Major City", was created. This variable categorizes cities based on the top 5 cities by unique patient count, while the remaining cities, including rows with an "Unknown" value, were labeled as "Other".
 
 ## 3.3 Extracting Feature Tables
 
-To enhance data accessibility, key feature tables were created for streamlined analysis:
+In addition to the data features the following key feature tables were created:
 
-| Feature Table               | Description                                                                     |
-|-----------------------------|---------------------------------------------------------------------------------|
-| **Diabetes Type Table**     | Aggregates diabetes classification based on ICD-10 codes per unique identifier. |
-| **Comorbidity Table**       | Stores Charlson Comorbidity Index scores per unique identifier.                 |
-| **Diabetes Feature Table**  | Captures diabetes-specific indicators, including treatment intensity.           |
-| **Family Size Table**       | Groups members under the same policy to determine household size.               |
-| **Unique Identifier Table** | Stores transformed IDs for downstream merging and validation.                   |
-| **ICD-1 Lookup Table**      | A lookup table to stode the ICD-10 descriptions.                                |
+| Feature Table                        | Description                                                                                                                                                                                                                                |
+|--------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Diabetes Type Table**              | Extracts diabetes-related ICD-10 codes and calculates the total number of diabetes types reported                                                                                                                                          |
+| **Diabetes Feature Table**           | Aggregates data for diabetes-related complications and calculates the total number of complications.                                                                                                                                       |
+| **Comorbidity Table**                | Identifies comorbid conditions and calculates the total number of comorbidities for each patient.                                                                                                                                          |
+| **Family Size Table**                | Counts the number of unique unique_id values within each policy_number and member_code pair, indicating the household or family size.                                                                                                      |
+| **Unique Identifier Table**          | Combines unique identifiers with maximum BMI, BMI category, and the city with the highest occurrence per unique_id.                                                                                                                        |
+| **City complications feature table** | Merges data from various feature tables, fills missing values with 0, and calculates total complications, comorbidities, and diabetes types for each city. Unspecified diabetes mellitus (E14) is assigned if no diabetes code is present. |
+| **ICD-1 Lookup Table**               | A lookup table to stode the ICD-10 descriptions.                                                                                                                                                                                           |
+
+**Diabetes Type Table**  
+
+The Diabetes Type Table extracts, for each unique patient identifier, the unique values of ICD-10 codes that indicate a diabetes diagnosis (E09, E10, E11, E12, E13, E14). These ICD-10 codes contain the letter "E" but not the character ".". The table was created by pivoting the ICD-10 column and converting it into an indicator variable (1 for presence, 0 for absence). The values across columns were then summed to calculate the total number of diabetes types reported for each patient.
+
+**Diabetes Complications Table**
+
+The Diabetes Complications Table focuses on ICD-10 codes that represent diabetes-related complications. It extracts and aggregates data based on ICD-10 codes that contain both "E" and the character "." (indicating complications). Each patient’s complications were tracked and aggregated, with the total number of complications calculated by summing the individual complication indicators across columns.
+
+**Comorbidity Table**
+
+The Comorbidities Table identifies conditions that are comorbid with diabetes by excluding diabetes-related ICD-10 codes (those containing "E"). This table aggregates the presence of other conditions, with the total number of comorbidities for each patient calculated by summing the values across different comorbidity categories.
+
+**City complications feature table**
+
+Merges individual data (e.g., age, max BMI, majority city location) with other feature tables (diabetes type, complications, and comorbidities), aggregating the total complications, comorbidities, and diabetes type information for each individual. In addition to other operations for data quality.
+
 
 
 ## 3.4 Storing Features for Reuse
