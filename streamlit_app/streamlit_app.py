@@ -1,11 +1,12 @@
 import streamlit as st
 import pickle
+import numpy as np
 import math
 
 # App 1 - Diabetes Complications Prediction
 def diabetes_complications_prediction():
     # Load the trained model
-    with open("poisson_reg_model.pkl", "rb") as f:
+    with open("streamlit_app/poisson_reg_model.pkl", "rb") as f:
         model = pickle.load(f)
 
     # Streamlit UI
