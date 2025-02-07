@@ -1,4 +1,7 @@
-<h2>Analysis of Diabetic Population Claims Data</h2>
+<div style="display: flex; flex-direction: column; justify-content: center; height: 100vh; text-align: center;">
+  <h1>Analysis of Diabetic Population Claims Data</h1>
+  <h3>Author: Raed K. Alotaibi</h3>
+</div>
 
 <div style="page-break-after: always;"></div>
 
@@ -15,7 +18,7 @@
   - [2.3 Data Cleaning](#23-data-cleaning)
   - [2.4 Data Quality checks](#24-data-quality-checks)
 - [3. Feature Engineering \& Feature Store](#3-feature-engineering--feature-store)
-  - [3.1 Overview of Data Transformations \& Feature Engineering](#31-overview-of-data-transformations--feature-engineering)
+  - [3.1 Overview](#31-overview)
   - [3.2 Key Data Transformations \& Feature Creation](#32-key-data-transformations--feature-creation)
   - [3.3 Extracting Feature Tables](#33-extracting-feature-tables)
   - [3.4 Storing Features for Reuse](#34-storing-features-for-reuse)
@@ -25,10 +28,9 @@
   - [4.3 Data Extraction](#43-data-extraction)
   - [4.4 Exploratory Data Analysis](#44-exploratory-data-analysis)
   - [4.5 Modeling](#45-modeling)
-  - [](#)
-  - [4.6 : Model Results](#46--model-results)
-  - [4.7 Discussion, Limitations](#47-discussion-limitations)
-  - [4.9 : Conclusion and Strategic Recommendations](#49--conclusion-and-strategic-recommendations)
+  - [4.6 Model Results](#46-model-results)
+  - [4.7 Discussion](#47-discussion)
+  - [4.9 Conclusion and Strategic Recommendations](#49-conclusion-and-strategic-recommendations)
 
 <div style="page-break-after: always;"></div>
 
@@ -42,11 +44,14 @@ model development to generate actionable healthcare insights.
 The approach employs a structured data engineering process that ensures data integrity and quality, with a feature store as a 
 key element providing consistency and reusability across models, improving efficiency and reproducibility.
 
-The primary hypothesis proposed that city-level location significantly influences the occurrence of diabetes complications. This hypothesis is supported by strong scientific evidence suggesting that the built environment—factors like urban design, access to healthcare, and lifestyle—can have a substantial impact on long-term health outcomes. To test this, a Zero-Inflated Poisson (ZIP) regression model was selected for its ability to handle zero-inflation and its focus on explainability. The model aimed to predict the number of reported diabetes complication claims per patient, with city location as the main explanatory variable, while controlling for important variables such as age, gender, BMI, and comorbidities.
+The primary hypothesis proposed that city-level location influences the occurrence of diabetes complications. This hypothesis is supported by strong scientific evidence suggesting that the built environment—factors like urban design, access to healthcare, and lifestyle—can have a substantial impact on long-term health outcomes. 
 
-The results revealed significant differences in complication rates across cities, with Jeddah and Alkhobar exhibiting higher rates than Riyadh. Additionally, the model highlighted a strong association between the number of comorbidities and complications, as well as between the number of different diabetes types claimed on a patient and the total number of diabetes complications.
+The hypothesis was tested using a Zero-Inflated Poisson (ZIP) regression model. The model aimed to predict the number of reported diabetes complication claims per patient, with city location as the main explanatory variable, while controlling for important variables such as age, gender, BMI, and comorbidities. The model was selected for its ability to handle zero-inflation and its focus on explainability
 
-Based on these findings, several strategic recommendations are suggested. These include implementing targeted interventions in cities like Jeddah and Alkhobar, where higher complication rates were observed. Furthermore, enhancing data collection—particularly by incorporating factors such as socioeconomic status and lifestyle—could improve the model’s predictive accuracy and provide more personalized insights to inform healthcare planning.
+The results revealed significant differences in complication rates across cities, with Jeddah and Alkhobar exhibiting higher rates than Riyadh. Additionally, a strong association was found between the total number of different diabetes types reported for a patient and the total number of diabetes complications.
+
+Based on these findings, several strategic recommendations are proposed. Health interventions should be targeted in high-risk areas within cities , where higher complication rates were observed, with a focus on improving diabetes care and reducing complications in these areas. Additionally, enhancing the quality of care in high risk areas is crucial, addressing gaps in healthcare services, patient management, and access to medical resources. Furthermore, improving data collection practices is essential, particularly by incorporating geographical information, socioeconomic status, and lifestyle factors. This will enable more detailed and accurate analyses, helping to refine predictive models and provide personalized insights to guide healthcare planning and resource allocation.
+
 <div style="page-break-after: always;"></div>
 
 
@@ -64,42 +69,40 @@ This project aims to analyze claims data for a diabetic population, uncovering k
 - Propose strategies to enhance data integrity and analytics adoption within enterprise settings.
 
 ## 1.3 Skills Matrix
-| Application in Report   | Description                                                                |
-|-------------------------|----------------------------------------------------------------------------|
-| Data Ingestion          | Best practifce in data loading and data type.                              |
-| Data Cleaning           | Handling missing values, duplicates, and plausibility checks               |
-| Descriptive Analytics   | Summarizing dataset attributes, distribution, and trends                   |
-| Data Quality Assessment | Identifying inconsistencies and proposing enhancements                     |
-| Feature Engineering     | Creating structured and meaningful features for modeling                   |
-| Advanced Analytics      | Applying clustering, predictive modeling, and hypothesis testing           |
-| AI & LLM Integration    | Exploring retrieval-based AI insights for structured and unstructured data |
-| Tools                   | Python, Pandas, Scikit-learn, Matplotlib, Seaborn, SQL, Parquet            |
-
-*Suggestions: Add specific tools in the skills matrix*
+| Application in Report      | Description                                                                |
+|----------------------------|----------------------------------------------------------------------------|
+| Data Ingestion             | Best practifce in data loading and data type.                              |
+| Data Cleaning              | Handling missing values, duplicates, and plausibility checks               |
+| Descriptive Analytics      | Summarizing dataset attributes, distribution, and trends                   |
+| Data Quality Assessment    | Identifying inconsistencies and proposing enhancements                     |
+| Feature Engineering        | Creating structured and meaningful features for modeling                   |
+| Advanced Analytics         | Applying clustering, predictive modeling, and hypothesis testing           |
+| Tools                      | Python, Pandas, Scikit-learn, Matplotlib, Seaborn, SQL, Parquet            |
+| AI & LLM Integration [WIP] | Exploring retrieval-based AI insights for structured and unstructured data |
 
 ## 1.4 Project Overview
-This report demonstrates how a `modular analytics pipeline` improves data science workflows in an enterprise setting. The project focuses on analyzing a diabetes claims dataset, with tasks like data extraction, cleaning, feature engineering, model development, and deployment being handled independently by specialized teams.
+This report demonstrates how a `modular analytics pipeline` improves data science workflows in an enterprise setting. The project focuses on analyzing a diabetes claims dataset, with tasks like data extraction, cleaning, feature engineering, model development, and deployment being handled independently in different layers.
 
 In contrast to traditional siloed approaches, the modular pipeline enables parallelization, reducing bottlenecks and fostering efficient collaboration. The central component of this pipeline is a `feature store`, where engineered features are stored and made accessible for quick model development and deployment.
 The pipeline includes the following stages:
 
 - Data Extraction: Automated extraction from various sources like databases, APIs, and live events.
-- Data Preprocessing: Dat ingestion, data cleaning, validation, and initial EDA.
+- Data Preprocessing: Data ingestion, data cleaning, validation, and initial EDA.
 - Feature Engineering: Creation of features stored in the `feature store` for future use.
-- Modeling and Reporting: Teams extract data from the `feature store`, build models, and perform hypothesis testing.
+- Modeling and Reporting: Extracting data from the `feature store`, model building, and hypothesis testing.
 - Model Deployment & Monitoring: Final model deployment for generating predictive insights and supporting decision-making.
 
-***Insert a graphics flow chart for the methodology section***
+A flow chart of the process: 
+![alt text](<Screenshot 2025-02-07 143305.png>)
 
 <div style="page-break-after: always;"></div>
-
 
 
 # 2. Preprocessing Steps
 
 ## 2.1 Project setups and tools
 
-For this project we first created a new virtual environment using Conda with Python 3.11. For version control we are using Git and Github as the reposiitory. The following key libraries were used:
+For this project we first created a new virtual environment using `Conda` with `Python 3.11`. For version control we are using `Git` and `Github` as the project repository. The following key libraries were used:
 
 
 | Library         | Purpose                                |
@@ -131,11 +134,18 @@ C:.
 └───streamlit_app       # Streamlit application for frontend deployment
 ```
 
-All analysis, exploration and model building were done in jupyter notebook.
+All analysis, exploration and model building were done in jupyter notebook, the following is a description of the function of each notebook:
+
+- **01_raw_node.ipynb**: Handles data ingestion and data quality check with some cleaning.
+- **02_intermediate_node.ipynb**.ipynb: Handles feature engineering and feature table creation.
+- **03_primary.ipynb**: Performs exploratory data analysis (EDA).
+- **03_Report_a_city_analysis.ipynb**: This is the full report for city-level comparison and the counts of diabetes comorbidities. The analysis extracts the feature table, performs EDA, modeling, and model diagnostics with summary results for the model.
+- **04_Prediction_model_comorbidities**.ipynb: Builds and evaluates prediction models.
+
 
 ## 2.2 Data Ingestion
 
-The raw layer ingests CSV files while enforcing schema validation. The goals is to ensures that each column maintains the correct data type, preventing inconsistencies in downstream processing. The data is then converted to `Parquet format` to optimize storage efficiency, ensure faster read and write operations, and preserve data types across processing stages
+The raw layer ingests CSV files while enforcing schema validation. The goals is to ensures that each column maintains the correct data type, preventing inconsistencies in downstream processing. The data is then converted to `Parquet` format to optimize storage efficiency, ensure faster read and write operations, and preserve data types across processing stages
 
 **_Schema Validation and Column Standardization_**
 
@@ -158,10 +168,6 @@ dtype_dict = {
     "City": "string",           # City as string
     "CLAIM_TYPE": "category",   # Claim type is categorical
 }
-```
-<div style="page-break-after: always;"></div>
-
-```python
 # Column renaming lookup table
 column_lookup = {
     "MEMBER_CODE": "member_code",
@@ -179,14 +185,9 @@ column_lookup = {
 raw_data = pd.read_csv(raw_data_path, dtype=dtype_dict)
 
 ```
-
-**_Conversion to Parquet for Type Preservation_**
-
-After schema validation, the dataset is saved in `Parquet` format which has the benefit of maintaining data types across different processing layers and is more efficient in data storage.
-
 **Examination of the Raw data set**
 
-An initial examination of the raw data set is done here including examinig the dimensions of the data set (173772 rows and 10 columns), the data types of the columns,  inspecting the head and tails, the count of missing values per row for each column , and the number of unique values for each column. 
+An initial examination of the raw data set is done at this stage including examinig the dimensions of the data set (173772 rows and 10 columns), the data types of the columns,  inspecting the head and tails, the count of missing values per row for each column , and the number of unique values for each column. 
 
 ---
 ## 2.3 Data Cleaning
@@ -200,9 +201,8 @@ A summary of missing values was generated to assess completeness. The city colum
 ***2.3.2 Identifying and Handling Duplicates***
 
 For duplicates the following were identified
-- Two rows were identified as duplicates and one record was retained.
-- The claim_type column showed duplication where records with an 'I' & 'O' value had  identical values across all other columns in whichh 34,233 out of 34,235 records with claim_type = I had an identical entry with claim_type = O (the missing two rows are probably due to not being sampled).
-- To handle the duplicates rows, the claim type was converted to an indicator which = 1 if the claim_type = I, and 0 otherwise. Rows of the corrosponding claim_type = O were removed. 
+- Two rows were identified as duplicates --> only one record was retained.
+- The claim_type column showed duplication where records with an 'I' & 'O' value had  identical values across all other columns in which 34,233 out of 34,235 records with claim_type = I had an identical entry with claim_type = O (the missing two rows are probably due to not being within the sampled data extract) --> The claim type was converted to an indicator which = 1 if the claim_type = I, and 0 otherwise. Rows of the corrosponding claim_type = O were removed. 
 
 
 ## 2.4 Data Quality checks
@@ -210,7 +210,7 @@ To ensure the dataset maintains logical consistency and accuracy, a series of da
 
 ***2.4.1 Logical Value Checks***
 
-Key numerical and categorical variables were validated:
+Key numerical and categorical variables validated included:
 
 ***Age***
 
@@ -220,15 +220,16 @@ Key numerical and categorical variables were validated:
 ***BMI***
 
 - Tested that  all values were within a reasonable range of (10–80). Values exceeding these may not necessarily be non-logical but may need further investigation.
-- There were 20 rows with values exceeding the upper limit of which 7 had a unique member_code and policy_number. The number is low we will ignore it for now.
+- There were 20 rows with values exceeding the upper limit, of which 7 had a unique member_code and policy_number. The total records of extreme values in this case is low and we will ignore it for now.
 
 ***Gender***
 
-Ensured only expected categorical values ("M" or "F") were present.
+- Ensured only expected categorical values ("M" or "F") were present.
+- No records showed any non-logical values.
 
 ***2.4.2 Identifying Family Units Using member_code***
 
-Some member_code values are linked to individuals of different ages and genders, suggesting that member_code is not unique to an individual but may represent a family unit instead (see example below). To handle thie a unique identifier for individuals was created. This is described in detail in the feature engineering section.
+Some member_code values are linked to individuals of different ages and genders, suggesting that member_code is not unique to an individual but may represent a family unit instead (see example below). 
 
 | policy_number | member_code | gender | age |
 |---------------|-------------|--------|-----|
@@ -236,6 +237,8 @@ Some member_code values are linked to individuals of different ages and genders,
 | 131           | 26730932    | F      | 72  |
 | 144           | 26730932    | M      | 71  |
 | 176           | 26730932    | F      | 67  |
+
+To handle thie a unique identifier for individuals was created. This is described in detail in the feature engineering section.
 
 ***2.4.3 Correct code mapping***
 
@@ -246,7 +249,6 @@ An ICD-10 lookup table was created for icd_code and icd_description to:
 - Detect missing or mismatched descriptions requiring correction.
 
 No ICD-10 code mismatch or duplication was found.
-
 
 ***2.4.4 Non-Standardized City Names***
 
@@ -268,7 +270,7 @@ A summary of member_code groupings was also saved in non_unique_member_codes.csv
 
 # 3. Feature Engineering & Feature Store
 
-## 3.1 Overview of Data Transformations & Feature Engineering
+## 3.1 Overview
 This section outlines the structured process of transforming raw data into analytical features for downstream modeling and analysis. The approach follows a layered transformation method, converting raw attributes into structured feature tables.
 
 *Note*: Feature engineering is an iterative process that evolves based on exploratory analysis. While this report presents feature creation before descriptive analytics for clarity, the actual process involved several iterations of exploratory data analysis, transformation and testing.
@@ -299,11 +301,11 @@ These categorizations enable comparative analysis across different patient group
 
 ***3.2.3 Grouping Cities with low counts into Other category***
 
-A new feature "Major City", was created. This variable categorizes cities based on the top 5 cities by unique patient count, while the remaining cities, including rows with an "Unknown" value, were labeled as "Other".
+A new feature "Major City", was created. This variable categorizes cities based on the top 5 cities by frequncy of unique patient records, while the remaining cities, including rows with an "Unknown" value, were labeled as "Other".
 
 ## 3.3 Extracting Feature Tables
 
-In addition to the data features the following key feature tables were created:
+In addition to the data features the following key feature tables were created [details of the method is found within the notebook `02_intermediate_node.ipynb`]:
 
 | Feature Table                        | Description                                                                                                                                                                                                                                |
 |--------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -375,11 +377,11 @@ note: In the current project not all the features created were necessaraly used 
 
 ## 4.1 Introduction
 
-Scientific evidence strongly points to the fact that the health of individuals is increasingly shaped by the built environment surrounding them. Geographic differences between cities—shaped by factors like healthcare access, socioeconomic conditions, and environmental quality—can significantly influence health outcomes. For individuals with chronic conditions such as diabetes, these city-level variations in resources, infrastructure, and lifestyle factors may contribute to disparities in the progression of complications, with some cities offering better health outcomes than others.
+Scientific evidence points to the fact that the health of individuals is increasingly associated with the built environment surrounding them. Geographic differences between cities—shaped by factors like healthcare access, socioeconomic conditions, and environmental quality—can  influence health outcomes. For individuals with chronic conditions such as diabetes, these city-level variations in resources, infrastructure, and lifestyle factors may contribute to differences in the progression of complications, with some cities offering better health outcomes than others.
 
 In this analysis, we investigate the association between the number of diabetes complications and the city-level location of diabetic patients within Saudi Arabia, using a sample of medical claims records. By examining the geographic distribution of diabetes complications and integrating demographic information (age, sex), body measurements (BMI), and comorbidity data, we aim to explore whether living in certain cities correlates with a difference in the number of diabetes complication claims per individuals.
 
-*The objectives of this analysis are:*
+*objectives of the analysis is:*
 
 - Investigate the relationship between city-level location and the frequency of diabetes complications.
 - Analyze demographic and health-related factors, including age, sex, BMI, and comorbidities, and understand their role in diabetes complications at the city level.
@@ -388,22 +390,21 @@ In this analysis, we investigate the association between the number of diabetes 
 
 ## 4.2 Methodology
 
-This section outlines the steps for conducting the analysis, model building, and validation.
-
-1. Data Extraction: Data is extracted from the feature store, ensuring consistency and accessibility for analysis.
-2. Exploratory Data Analysis (EDA): A comprehensive analysis is performed, including:
+The following step were followed in the conduct of the analysis: 
+1. Data Extraction: Data was extracted from the feature store, ensuring consistency and accessibility for the analysis.
+2. Exploratory Data Analysis (EDA): A comprehensive analysis was performed including:
    - Summary Statistics: To provide an overview of key variables.
    - Univariate Analysis: To analyze the distribution of individual variables.
    - Bivariate Analysis: To examine relationships between pairs of variables.
    - Multivariate Analysis: To explore interactions between multiple variables.
    - Correlation Analysis: To identify significant correlations between variables.
-3. Model Building: The appropriate modeling techniques are selected based on the analysis.
+3. Model Building: The appropriate modeling techniques are selected based on the analysis of the data.
 4. Model Selection: The best-fitting model is chosen based on evaluation metrics such as AIC and BIC.
-5. Model Evaluation: The model’s performance is assessed using metrics such as log-likelihood, pseudo-R², and other relevant statistical tests, along with residual diagnostics to check for model assumptions and ensure the reliability of the model.
+5. Model Evaluation: The model’s performance is assessed using metrics such as pseudo-R² and residual diagnostics to check for model assumptions and ensure the reliability of the model.
 
 ## 4.3 Data Extraction
 
-Using the feature store, we extracted the dataset `city_comp_df`, which focuses on individual-level demographics and claims summaries. The dataset includes the target variable of interest, number of reported diabetes complications, the main explanatory variable, city, and other key variables such as age, BMI, number of comorbidities, type of diabetes reported, and total number of diabetes reported. Below is a description of the variables included in the dataset:
+Using the feature store, we extracted the dataset `city_comp_df`, which focuses on individual-level demographics and disease summary data. The dataset includes the target variable of interest, number of reported diabetes complications, the main explanatory variable, city, and other key variables such as age, BMI, number of comorbidities, type of diabetes reported, and total number of diabetes reported. Below is a description of the variables included in the dataset:
 
 | #  | Column              | Description                                                         | Dtype    |
 |----|---------------------|---------------------------------------------------------------------|----------|
@@ -444,27 +445,23 @@ The table below provides a summary of key variables in the dataset:
 | total_complications  | 1.28  | 1.42  | 0.00  | 0.00  | 1.00  | 2.00  | 18.00 |
 | total_comorbidities  | 1.03  | 0.75  | 0.00  | 1.00  | 1.00  | 1.00  | 6.00  |
 
-In terms of the Total Complications:
-
-On average, individuals have 1.28 reported diabetes complications of which 25% of individuals have zero reported complications and the maximum number of reported complications is 18, indicating a wide range of reported complications count among patients.  
-
 ***4.4.2 Total complications***
 
-In addition around 35% of the population have no reported complication while 31% have 1 repoted complication [not shown in the previous table].
+On average, individuals has 1.28 reported diabetes complications of which 25% of individuals has zero reported complications. The maximum number of reported complications reached 18, indicating a wide range of reported complications count among patients. In addition around 35% of the population have no reported complication while 31% have 1 repoted complication [not shown in the table].
 
-The distribution [image] shows a right-skewed pattern with a significant number of individuals reporting zero complications, followed by smaller frequencies for higher counts of complications. This suggests that most individuals experience low complication rates. The zero-inflated distribution indicates that many individuals report no complications, which should be considered when modeling (Poisson regression assumptions may be affected by the excess of zeros).
+The distribution if total diabetes complications shows a right-skewed pattern with a significant number of individuals reporting zero complications, followed by smaller frequencies for higher counts of complications. The zero-inflated distribution indicates that many individuals report no complications, which we consider in the modeling phase, detailes are provided later.
 
 ![Complications Distribution](image-15.png)
 
 
 ***4.4.3 City counts***
 
-Jeddah has the highest count of individuals, representing 35.67% of the total population, followed by Riyadh. The 'Other' city goroup represents 23.52% of the population. This distribution shows a disproportionate representation of cities, with Jeddah and Riyadh having a significant portion of the data.
+Jeddah has the highest count of individuals, representing 35.67% of the total population, followed by Riyadh. The 'Other' city group represents 23.52% of the population. This distribution shows a disproportionate representation of cities, with Jeddah and Riyadh having a significant portion of the data.
 
 | Category | Count | Percentage |
 |----------|-------|------------|
-| Riyadh   | 5273  | 28.21      |
 | Jeddah   | 6668  | 35.67      |
+| Riyadh   | 5273  | 28.21      |
 | Alkhobar | 885   | 4.73       |
 | Madina   | 771   | 4.12       |
 | Makkah   | 700   | 3.74       |
@@ -476,7 +473,7 @@ Jeddah has the highest count of individuals, representing 35.67% of the total po
 
 ***4.4.4 Age Distribution***
 
-The age distribution is right-skewed, with noticeable increases in counts after the ages of 50 and 60. The largest proportion of the population falls within the 60-69 age group, representing 66.60% of the population, followed by the 70-79 age group at 20.31%. The average age is 64.7 years. The 50-59 age group accounts for 9.79%, while other age groups each represent less than 2% of the population.
+The age distribution is right-skewed, with noticeable increases in counts after the ages of 50 and 60. The largest proportion of the population falls within the 60-69 age group, representing 66.60% of the population, followed by the 70-79 age group at 20.31%. The 50-59 age group accounts for 9.79%, while other age groups each represent less than 2% of the population. The average age is 64.7 years.
 
 
 | Category | Count | Percentage |
@@ -499,7 +496,7 @@ The age distribution is right-skewed, with noticeable increases in counts after 
 
 ***4.4.5 BMI Distribution***
 
-The BMI distribution is right-skewed, with a majority of individuals (> 77%) falling within the overweight and obese categories.
+The BMI distribution is right-skewed with extreme values reaching >100. The majority of individuals (> 77%) have BMI values within the overweight and obese categories.
 
 | Category    | Count | Percentage |
 |-------------|-------|------------|
@@ -522,7 +519,7 @@ The majority of individuals have one comorbidity, followed by a smaller portion 
 
 ***4.4.6 Total reported diabetes type per patient***
 
-The majority of individuals have one reported diabets diagnosis, while a large proportion of individuals have no reported diabetes type (plausabile explanation is that this is a sampled from a larger claims data set and individuals with a diabetes claim might not be within the smaples extracted).
+The majority of individuals have one reported diabets diagnosis, while a large proportion of individuals have no reported diabetes type. Althoug this is a data setsextracted from a diabetes registry a plausabile explanation of many records not having a diabetes type is that this is sampled from a larger data set and individuals, and information regarding the diabetes claim might have been missed.
 
 ![alt text](image-14.png)
 
@@ -530,23 +527,23 @@ The majority of individuals have one reported diabets diagnosis, while a large p
 
 ***4.4.7 Correlations Analysis***
 
-Total complications is positively correlated with E10, E11, and E13 (types of diabetes), indicating that individuals with these diagnoses tend to have more complications.
-There is a strong correlation between total complications and total DM ICD codes. City vairables show a weak correlation with total diabetes complications, with Jeddah being the only cities showing a moderate positive correlation. Age showes a weak negative correlation while BMI, and comorbidities also show weak positive association with complications. 
+Total complications is positively correlated with E10, E11, and E13 (Type I, Type II, and "Other specified diabetes mellitu", respectivly). Indicating that individuals with these diagnoses tend to have more diabetes complications.
+There is a strong correlation between total complications and total DM ICD codes. City vairables show a weak correlation with total diabetes complications, with Jeddah being the only city showing a moderate positive correlation. Age showes a weak negative correlation, while BMI, and total comorbidities both showed a weak positive association with total diabetes complications. 
 
 ![alt text](image-24.png)
 
 
-***4.4.8 Total Complications by City***
+***4.4.8 Total Diabetes Complications by City***
 
-The boxplot shows the distribution of total diabetes complications across cities. There is no clear difference in the total complications across cities.
+The following boxplot shows the distribution of total diabetes complications across cities. There is no clear difference in median value of total complications across cities, however there is some variation in the range of values.
 
 ![boxplot city](image-30.png)
 
-There is no visible difference in the distribution of total complications between cities when stratified by gender. However, female patients exhibit higher variability in complication levels compared to males, except in AlKhobar and Madina, where the variability between genders appears similar. this may suggest that gender may influence the degree of complications, with women having more variance in the total complications.
+When stratifying by gender we find no visible difference in the distribution of total complications between cities. However, female patients exhibit higher variability in complication levels compared to males across cities, except in AlKhobar and Madina, where the variability between genders appears similar. this may suggest that gender may influence the degree of complications, with women having more variance in the total complications.
 
 ![boxplot city by gender](image-31.png)
 
-When stratifying across bmi groups we observe that higher BMI (especially obesity) is linked to more total complications compared to healthyacross cities, and underweight individuals also show a slight tendency for higher complications but with less variability, though this relationship is weak.
+When stratifying across bmi groups we observe that higher BMI (especially obesity) is linked to more total complications compared to a healthy bmi level across cities, and underweight individuals also show a slight tendency for higher complications but with less variability, though this relationship is weak.
 
 ![boxplot city by bmi cat](image-35.png)
 
@@ -554,7 +551,7 @@ More comorbidities are associated with higher total diabets complications across
 
 ![boxplot city by comorbidities](image-33.png)
 
-There is a very strongassociation between increasing number of different diabetes diagnosis on an individual and the total diabetes comorbidities. This association is consistant across all cities. 
+There is a very strong association between the increasing number of different diabetes diagnosis on an individual and the total diabetes comorbidities. This association is consistant across all cities. 
 
 ![boxplot city by total reported diabetes types](image-34.png)
 
@@ -569,7 +566,7 @@ The selection of the model was driven by several crucial factors:
 
 - Nature of the Analysis: Our analysis is primarily focused on hypothesis testing, where explainability is prioritized over pure predictive performance. The goal is to understand the key factors driving diabetes complications, rather than solely optimizing predictive accuracy. This necessitated the choice of a model that would provide both insight and interpretability of the results.
 
-- Count Nature of the Target Variable: The target variable, total diabetes complications, represents count data (i.e., the number of complications per individual). This type of outcome is naturally suited for count regression models. Given the characteristics of our target variable, we considered models such as Poisson regression, which is commonly used for modeling count data.
+- Count Nature of the Target Variable: The target variable, total diabetes complications, represents count data (i.e., the number of diabetes complications claimed per individual). This type of outcome is naturally suited for count regression models. Given the characteristics of our target variable, we considered models such as Poisson regression, which is commonly used for modeling count data.
 
 - Model Assumptions: Poisson regression assumes equidispersion, where the mean and variance of the outcome variable are equal. However, in practice, this assumption may not always hold, especially in datasets with significant skewness or excess zeros.
 
@@ -583,14 +580,14 @@ To test whether the assumptions of Zero-Inflation and Equidispersion hold, we pe
 2. Dispersion Statistic:
    - We calculated the variance-to-mean ratio. A value greater than 1 suggests overdispersion (where the variance exceeds the mean), indicating that Poisson regression might not be the most suitable model. The dispersion statistic for the dataset was 1.56, which is greater than 1, indicating overdispersion (see below image). This overdispersion is likely driven by the large number of zero values (many individuals reporting no complications).
 
-To address this, we compared two potential models: the Zero-Inflated Poisson (ZIP) model and the Zero-Inflated Negative Binomial (ZINB) model. Although the ZINB model would theoretically provide a better fit due to its ability to handle overdispersion, it failed to converge during model fitting. As a result, we proceeded with the Zero-Inflated Poisson (ZIP) model.
+To address this, we compared two potential models: the Zero-Inflated Poisson (ZIP) model and the Zero-Inflated Negative Binomial (ZINB) model. Although the ZINB model would theoretically provide a better fit due to its ability to handle overdispersion and zero inflaction, it failed to converge during model fitting. As a result, we proceeded with the Zero-Inflated Poisson (ZIP) model which is able to handle zero-inflation.
 
 ![alt text](image-36.png)
 
 
 ***4.5.2 Model building***
 
-Following the model selection process, several models of increasing complexity were built to analyze the factors influencing total diabetes complications. The models are compared based on their goodness of fit, AIC, BIC, and Pseudo R² values.
+Several models were created using the zero-inflated poisson regression. The models were built with increasing complexity incorporating controlling variables [see below]. The models were then compared based on their goodness of fit, AIC, BIC, and Pseudo R² values.
 
 The models built include:
 - Model 1: A basic model with city-level effects.
@@ -603,6 +600,11 @@ Model Comparison Criteria:
 - AIC and BIC: Lower values indicate better model fit, with Model 4 performing best across both metrics.
 - Pseudo R²: This metric increases with model performance, and Model 4 achieves the highest Pseudo R² value (0.107), indicating the best fit and explanatory power.
 
+***4.5.3  Model Comparison & Diagnostics***
+
+The following shows the summary results of the models:
+
+**Model Comparison:**
 
 | Coefficient            | Intercept         | Model 1           | Model 2           | Model 3           | Model 4           |
 |------------------------|-------------------|-------------------|-------------------|-------------------|-------------------|
@@ -624,18 +626,9 @@ Model Comparison Criteria:
 | Log-Likelihood | -29081.418 | -28867.131 | -28652.215 | -28385.078 | -25981.733 |
 | Pseudo R2      | 0.000      | 0.007      | 0.015      | 0.024      | 0.107      |
 
-*Notes:*
-Standard errors in parentheses [** p<.05, ***p<.01]
+*Notes*: Standard errors in parentheses [** p<.05, ***p<.01]
 
-***4.5.3  Model Comparison & Diagnostics***
-
-**Model Comparison:**
-
-Model 4 explained the highest proportion of variability, with a Pseudo R² of 0.107. While this is the best among the models tested, it remains relatively low, indicating room for improvement. Enhancing the model could involve selecting a more appropriate approach or adding more relevant data to better explain the variability.
-
-Several robust models, including those with interaction terms and clustered standard errors by policy_number, were tested, but no significant improvement in model quality was observed [results not shown here].
-
-In terms of model selection criteria, Model 4 showed the best performance with the lowest AIC (51,987.466) and BIC (52,081.497), indicating a superior fit. However, despite these advantages, the model's overall predictive power remains modest, suggesting that further refinement is needed.
+Model 4 explained the highest proportion of variability, with a Pseudo R² of 0.107. In addition Model 4 showed the best performance with the lowest AIC (51,987.466) and BIC (52,081.497), indicating a superior fit. Despite being the best model among the models tested, the model's overall predictive power remains modest, indicating room for improvement. This suggests that further refinement is needed, which could involve selecting a more appropriate approach or incorporating additional relevant data to better explain the variability.
 
 **Residual Diagnostics**
 
@@ -652,15 +645,19 @@ centration around zero with slight right skew, suggesting the model underpredict
 ![alt text](image-23.png)
 
 Overall the model diagnostic indicate that the model has difficulty fitting extreme value. 
+To address this several other robust models, including those with interaction terms and clustered standard errors by policy_number, were tested, but no significant improvement in model quality was observed [results not shown here].
+
 
 <div style="page-break-after: always;"></div>
----
 
-## 4.6 : Model Results
+
+## 4.6 Model Results
+
+The following results are based on Model 4 (the full model).
 
 ***4.6.1 City-Level Effects (Main Predictor)***
 
-Model 4 shows that Alkhobar, Jeddah, and Makkah have a positive association with the total number of diabetes complications compared to the baseline city, Riyadh. The coefficients for these cities are as follows:
+The  rersults of the model shows that Alkhobar, Jeddah, and Makkah have a positive association with the total number of diabetes complications compared to the baseline city, Riyadh. The coefficients for these cities are as follows:
 - Alkhobar: Coefficient = 0.237 (p < 0.01)
 - Jeddah: Coefficient = 0.132 (p < 0.01)
 - Makkah: Coefficient = 0.194 (p < 0.01)
@@ -681,9 +678,7 @@ Although a regulare Poisson model directly interprets how predictors affect the 
 <div style="page-break-after: always;"></div>
 
 
-## 4.7 Discussion, Limitations
-
-***4.7.1 Discussion***
+## 4.7 Discussion
 
 In this analysis, we hypothesized that there is an association between the number of diabetes complications and city location, based on previous studies that have highlighted the impact of urban environments on health outcomes. The findings of this analysis do not contradict this hypothesis. Specifically, we observed differences in the expected counts of diabetes complications across cities, with Alkhobar, Jeddah, and Makkah showing higher expected counts compared to the baseline city, Riyadh.
 However, while these differences are statistically significant, they cannot be fully attributed to city-level effects alone. Several limitations affect the interpretation of the results:
@@ -698,16 +693,15 @@ In addition to the city-level effects, we also observed a strong association bet
 - **Other Factors**: Additional factors, such as coexisting medical conditions, treatment regimens, or unmeasured aspects of healthcare delivery, could also play a role and warrant further investigation.
 This strong association underscores the importance of accurate diabetes classification and comprehensive patient management in understanding and reducing complications. Further research is needed to explore these potential explanations and their implications for improving care and health outcomes.
 
-***4.7.2 Limitations***
 
-Based on the findings of the analysis, the following recommendations are suggested:
+The analysis sufferd from the following limitations: 
 - **Sampling limitations**:The data has limited representation at both the individual and city levels, with an unclear and unequal sampling method. This is reflected in the population distribution, which shows overrepresentation of cities like Jeddah and Riyadh, and underrepresentation of others. The sampling method is not well-documented, potentially introducing bias into the results.
 - **Individual-Level factors**: Important individual-level factors, such as socioeconomic status, education level, physical activity, and quality of care received, were not included in the model. These factors are known to be strongly associated with diabetes complications and their absence likely impacts the model's predictive power. The length of diabetes and medical history were also not considered, both of which may play significant roles in determining complication outcomes.
 - **External factors**: Many external factors that could affect the probability of complications were not accounted for in the model. These include socioeconomic status, healthcare access, policy type, and neighborhood-level factors such as walkability and pollution. These missing variables likely contribute to the low explainability of the model and the unexplained variation in complications across cities. Further research is needed to incorporate these factors into future models for better interpretability.
 - **Modeling limitations**: The Zero-Inflated Poisson (ZIP) model was used to account for zero-inflation and overdispersion. However, these issues led to a poor model fit, especially with extreme values being underfitted, as indicated by the residual analysis. The low variance explanation of the model suggests that the predictors used were insufficient in explaining the variation in diabetes complications.
 
   
-## 4.9 : Conclusion and Strategic Recommendations
+## 4.9 Conclusion and Strategic Recommendations
 
 This analysis examined the relationship between city-level location and diabetes complications, highlighting significant differences in complications across cities. The model also identified Total Diabetes Types Claimed and Total Comorbidities as strong predictors of complications, underscoring the importance of accurate diagnoses and comprehensive patient management.
 While the findings align with existing literature on the built environment’s impact on health outcomes, the analysis was limited by several factors, including data quality, sampling bias, and unmeasured external factors. Future analyses should address these limitations by incorporating more granular data, exploring additional predictors, and using more sophisticated models for improved accuracy.
@@ -724,3 +718,4 @@ Explore how environmental factors (e.g., walkability, proximity to healthcare, a
 4. Improve Healthcare Quality and Access
 Assess the quality of care and identify any regional variations in diabetes complication rates across healthcare providers and locations.
   
+
