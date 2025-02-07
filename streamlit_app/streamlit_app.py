@@ -1,9 +1,6 @@
 import streamlit as st
 import pickle
-import numpy as np
-import pandas as pd
 import math
-from sklearn.linear_model import PoissonRegressor
 
 # App 1 - Diabetes Complications Prediction
 def diabetes_complications_prediction():
