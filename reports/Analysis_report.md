@@ -10,8 +10,9 @@
   - [1.3 Skills Matrix](#13-skills-matrix)
   - [1.4 Project Overview](#14-project-overview)
 - [2. Preprocessing Steps](#2-preprocessing-steps)
-  - [2.1 Data Ingestion](#21-data-ingestion)
-  - [2.2 Data Cleaning](#22-data-cleaning)
+  - [2.1 Project setups and tools](#21-project-setups-and-tools)
+  - [2.2 Data Ingestion](#22-data-ingestion)
+  - [2.3 Data Cleaning](#23-data-cleaning)
   - [2.4 Data Quality checks](#24-data-quality-checks)
 - [3. Feature Engineering \& Feature Store](#3-feature-engineering--feature-store)
   - [3.1 Overview of Data Transformations \& Feature Engineering](#31-overview-of-data-transformations--feature-engineering)
@@ -96,9 +97,45 @@ The pipeline includes the following stages:
 
 # 2. Preprocessing Steps
 
-## 2.1 Data Ingestion
+## 2.1 Project setups and tools
 
-The raw layer ingests CSV files while enforcing schema validation. This ensures that each column maintains the correct data type, preventing inconsistencies in downstream processing. The data is then converted to Parquet format for storage efficiency and type preservation.
+For this project we first created a new virtual environment using Conda with Python 3.11. For version control we are using Git and Github as the reposiitory. The following key libraries were used:
+
+
+| Library         | Purpose                                |
+|-----------------|----------------------------------------|
+| **Pandas**      | Data handling, ingestion, and cleaning |
+| **Numpy**       | Numerical operations                   |
+| **Statsmodels** | Model building                         |
+| **Streamlit**   | Frontend development and deployment    |
+| **Seaborn**     | Data visualization                     |
+| **Matplotlib**  | Data visualization                     |
+
+
+The project had the following structure:
+
+```bash
+C:.
+├───data
+│   ├───raw            # Raw data before preprocessing
+│   ├───intermediate   # Intermediate data used in processing
+│   ├───primary        # Primary dataset/raw data
+│   ├───feature_store  # Processed feature storage for reuse
+│   └────lookup         # Lookup tables (e.g., country or ICD codes)
+├───models              # Trained machine learning models
+├───notebooks           # Jupyter notebooks for analysis, exploration and model building
+│   └───__pycache__     # Python bytecode cache
+├───reports             # Generated reports (e.g., Excel)
+│   └───excel_report    # Excel-based reports
+├───src                 # Source code for project logic
+└───streamlit_app       # Streamlit application for frontend deployment
+```
+
+All analysis, exploration and model building were done in jupyter notebook.
+
+## 2.2 Data Ingestion
+
+The raw layer ingests CSV files while enforcing schema validation. The goals is to ensures that each column maintains the correct data type, preventing inconsistencies in downstream processing. The data is then converted to `Parquet format` to optimize storage efficiency, ensure faster read and write operations, and preserve data types across processing stages
 
 **_Schema Validation and Column Standardization_**
 
@@ -152,15 +189,15 @@ After schema validation, the dataset is saved in `Parquet` format which has the 
 An initial examination of the raw data set is done here including examinig the dimensions of the data set (173772 rows and 10 columns), the data types of the columns,  inspecting the head and tails, the count of missing values per row for each column , and the number of unique values for each column. 
 
 ---
-## 2.2 Data Cleaning
+## 2.3 Data Cleaning
 
 To ensure data consistency and integrity, a series of data cleaning steps were performed, including identifying and handling missing values, identifying and removing duplicates, and validating the data values after cleaning.
 
-***2.2.1 Identifying and Handling Missing Data***
+***2.3.1 Identifying and Handling Missing Data***
 
 A summary of missing values was generated to assess completeness. The city column was identified as having 4,700 missing values, the other columns did not contain any null values. Missing values in the city column were replaced with "Unknown".
 
-***2.2.2 Identifying and Handling Duplicates***
+***2.3.2 Identifying and Handling Duplicates***
 
 For duplicates the following were identified
 - Two rows were identified as duplicates and one record was retained.
@@ -275,8 +312,8 @@ In addition to the data features the following key feature tables were created:
 | **Comorbidity Table**                | Identifies comorbid conditions and calculates the total number of comorbidities for each patient.                                                                                                                                          |
 | **Family Size Table**                | Counts the number of unique unique_id values within each policy_number and member_code pair, indicating the household or family size.                                                                                                      |
 | **Unique Identifier Table**          | Combines unique identifiers with maximum BMI, BMI category, and the city with the highest occurrence per unique_id.                                                                                                                        |
-| **City complications feature table** | Merges data from various feature tables, fills missing values with 0, and calculates total complications, comorbidities, and diabetes types for each city. Unspecified diabetes mellitus (E14) is assigned if no diabetes code is present. |
-| **ICD-1 Lookup Table**               | A lookup table to stode the ICD-10 descriptions.                                                                                                                                                                                           |
+| **City complications feature table** | Contains individual-level data on diabetes complications, comorbidities, and diabetes type, merged with patient demographics and city-level location information.|
+| **ICD-1 Lookup Table**               | A lookup table to store for ICD-10 descriptions.                                                                                                                                                                                           |
 
 **Diabetes Type Table**  
 
@@ -292,20 +329,44 @@ The Comorbidities Table identifies conditions that are comorbid with diabetes by
 
 **City complications feature table**
 
-Merges individual data (e.g., age, max BMI, majority city location) with other feature tables (diabetes type, complications, and comorbidities), aggregating the total complications, comorbidities, and diabetes type information for each individual. In addition to other operations for data quality.
-
+The City Complications Feature Table contains individual-level data on diabetes complications, comorbidities, and diabetes type, merged with patient demographics and city-level location information. In cases where no diabetes codes are recorded for a patient, the type is assigned as Unspecified Diabetes Mellitus (E14). This is done by checking if the total number of diabetes-related ICD codes is less than 1, and if so, setting the E14 column to 1. The rationale behind this is that this dataset is a sample from the diabetes registry, where some individuals may not have explicit diabetes codes recorded but are assumed to have some form of diabetes.
 
 
 ## 3.4 Storing Features for Reuse
 
-- Engineered features were saved in structured feature tables to facilitate efficient retrieval, reuse, and analysis.
-- Outputs were stored in a feature store using Parquet format for optimized storage and column type consistency.
+The feature tables are stored in the feature store directory as the final stage before modeling. The feature store serves as a central repository where commonly used features are stored and processed for reuse and sharing across machine learning models or teams. In practice, a feature store might be implemented as a central database with different access rights granted to data science or analytical teams across the organization. Datasets within the store will also contain metadata describing the data, the methods used to produce it, and any associated data quality checks.
 
-*Suggestions: Explain how feature tables will be used in subsequent analysis*
+```bash
+C:.
+├───data
+│   ├───raw
+│   ├───intermediate
+│   ├───primary
+│   └───feature_store
+│           diabetes_type_feature.parquet
+│           comorbidity_feature.parquet
+│           diabetes_complication_feature.parquet
+│           family_size_table.parquet
+│           identifier_table.parquet
+│           city_comp_df.parquet
+├───models
+├───notebooks
+│   └───__pycache__
+├───reports
+│   └───excel_report
+├───src
+└───streamlit_app
+```
 
-Feature tables will be used to streamline the modeling process by providing pre-processed, consistent, and reusable data. This ensures that all models and analyses are based on the same set of features, improving reproducibility and efficiency. For example, the diabetes feature table can be directly used to train machine learning models to predict complications, while the comorbidity table can be used to assess the impact of comorbid conditions on health outcomes.
+Benefits of using a feature store:
 
-note: not all the features may be used in future analysis. 
+- **Enable feature reuse and sharing**: Reusable features are available across multiple models and teams, promoting consistency and efficiency.
+- **Ensure feature consistency**: Standardizes the feature data, ensuring consistency in its use across projects.
+- **Maintain peak model performance**: Provides reliable, high-quality features that can help maintain the performance of models over time.
+- **Enhance security and data governance**: Centralized control of features helps maintain data security and compliance with governance policies.
+- **Foster collaboration between teams**: Facilitates collaboration across different teams by providing shared access to a common set of features.
+
+note: In the current project not all the features created were necessaraly used in the downstream analysis. 
 
 <div style="page-break-after: always;"></div>
 
@@ -314,22 +375,16 @@ note: not all the features may be used in future analysis.
 
 ## 4.1 Introduction
 
-The built environment—the design and layout of urban spaces—has long been associated with public health outcomes. While factors like access to healthcare services, availability of recreational spaces, and urban design are important, the geographic location of individuals within a city can also influence their health. In particular, for individuals living with chronic diseases like diabetes, various factors such as access to healthcare, lifestyle, and local healthcare resources can contribute to the progression of complications.
+Scientific evidence strongly points to the fact that the health of individuals is increasingly shaped by the built environment surrounding them. Geographic differences between cities—shaped by factors like healthcare access, socioeconomic conditions, and environmental quality—can significantly influence health outcomes. For individuals with chronic conditions such as diabetes, these city-level variations in resources, infrastructure, and lifestyle factors may contribute to disparities in the progression of complications, with some cities offering better health outcomes than others.
 
-In this report, we investigate the association between the number of diabetes complications and the city-level location of diabetic patients within Saudi Arabia, using a sample of medical claims records. By examining the geographic distribution of diabetes complications and integrating demographic information (age, sex), body measurements (BMI), and comorbidity data, we aim to explore whether living in certain cities correlates with different health outcomes for diabetic individuals.
+In this analysis, we investigate the association between the number of diabetes complications and the city-level location of diabetic patients within Saudi Arabia, using a sample of medical claims records. By examining the geographic distribution of diabetes complications and integrating demographic information (age, sex), body measurements (BMI), and comorbidity data, we aim to explore whether living in certain cities correlates with a difference in the number of diabetes complication claims per individuals.
 
 *The objectives of this analysis are:*
 
 - Investigate the relationship between city-level location and the frequency of diabetes complications.
-- Analyze demographic and health-related factors, including age, sex, BMI, and comorbidities, to understand their role in diabetes complications at the city level.
-- Provide insights that may inform healthcare interventions or policy changes aimed at improving diabetes management and reducing complications across cities.
-Ultimately, this analysis seeks to identify any significant patterns that could inform public health strategies tailored to specific geographic regions.
-
-*Hypothesis:*
-
-There is a significant relationship between the `number of diabetes complications claims` and the `city` in which the patients reside. The analysis will explore whether certain cities experience higher rates of complications, potentially influenced by demographic factors like `age`, `sex`, `BMI`, and `comorbidities`.
-
-
+- Analyze demographic and health-related factors, including age, sex, BMI, and comorbidities, and understand their role in diabetes complications at the city level.
+- Provide insights for healthcare interventions or policy changes aimed at improving diabetes management and reducing complications across cities.
+- Identify any significant patterns that could inform public health strategies tailored to specific geographic regions or groups.
 
 ## 4.2 Methodology
 
