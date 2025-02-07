@@ -8,7 +8,7 @@ from sklearn.linear_model import PoissonRegressor
 # App 1 - Diabetes Complications Prediction
 def diabetes_complications_prediction():
     # Load the trained model
-    with open("..\\models\\poisson_reg_model.pkl", "rb") as f:
+    with open("poisson_reg_model.pkl", "rb") as f:
         model = pickle.load(f)
 
     # Streamlit UI
